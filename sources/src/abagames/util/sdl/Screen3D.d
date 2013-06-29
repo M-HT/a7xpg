@@ -5,8 +5,9 @@
  */
 module abagames.util.sdl.Screen3D;
 
-import string;
-import c.stdlib;
+import std.string;
+import std.c.stdlib;
+import std.conv;
 import SDL;
 import opengl;
 import abagames.util.Logger;
@@ -30,7 +31,7 @@ public class Screen3D: Screen {
   protected abstract void init();
   protected abstract void close();
 
-  public void initSDL() {
+  public override void initSDL() {
     if (lowres) {
       width /= 2;
       height /= 2;
@@ -38,7 +39,7 @@ public class Screen3D: Screen {
     // Initialize SDL.
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
       throw new SDLInitFailedException(
-	"Unable to initialize SDL: " ~ string.toString(SDL_GetError()));
+	"Unable to initialize SDL: " ~ to!string(SDL_GetError()));
     }
     // Create an OpenGL screen.
     Uint32 videoFlags;
@@ -46,10 +47,10 @@ public class Screen3D: Screen {
       videoFlags = SDL_OPENGL | SDL_RESIZABLE;
     } else {
       videoFlags = SDL_OPENGL | SDL_FULLSCREEN;
-    } 
+    }
     if (SDL_SetVideoMode(width, height, 0, videoFlags) == null) {
       throw new SDLInitFailedException
-	("Unable to create SDL screen: " ~ string.toString(SDL_GetError()));
+	("Unable to create SDL screen: " ~ to!string(SDL_GetError()));
     }
     glViewport(0, 0, width, height);
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -67,8 +68,8 @@ public class Screen3D: Screen {
     //gluPerspective(45.0f, (GLfloat)width/(GLfloat)height, nearPlane, farPlane);
     glFrustum(-nearPlane,
 	      nearPlane,
-	      -nearPlane * (GLfloat)height / (GLfloat)width,
-	      nearPlane * (GLfloat)height / (GLfloat)width,
+	      -nearPlane * cast(GLfloat)height / cast(GLfloat)width,
+	      nearPlane * cast(GLfloat)height / cast(GLfloat)width,
 	      0.1f, farPlane);
     glMatrixMode(GL_MODELVIEW);
   }
@@ -78,17 +79,17 @@ public class Screen3D: Screen {
     screenResized();
   }
 
-  public void closeSDL() {
+  public override void closeSDL() {
     close();
     SDL_ShowCursor(SDL_ENABLE);
   }
 
-  public void flip() {
+  public override void flip() {
     handleError();
     SDL_GL_SwapBuffers();
   }
 
-  public void clear() {
+  public override void clear() {
     glClear(GL_COLOR_BUFFER_BIT);
   }
 
@@ -100,7 +101,7 @@ public class Screen3D: Screen {
     exit(EXIT_FAILURE);
   }
 
-  protected void setCaption(char[] name) {
-    SDL_WM_SetCaption(string.toStringz(name), null);
+  protected void setCaption(const char[] name) {
+    SDL_WM_SetCaption(toStringz(name), null);
   }
 }

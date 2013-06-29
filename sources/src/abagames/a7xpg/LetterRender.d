@@ -31,7 +31,7 @@ public class LetterRender {
     glPopMatrix();
   }
 
-  public static void drawString(char[] str, float lx, float y, float s) {
+  public static void drawString(string str, float lx, float y, float s) {
     float x = lx;
     int c;
     int idx;
@@ -123,22 +123,22 @@ public class LetterRender {
     float x, y, length, size, t;
     int deg;
     for ( i=0 ; ; i++ ) {
-      deg = (int) spData[idx][i][4];
+      deg = cast(int) spData[idx][i][4];
       if (deg > 99990) break;
-      x = -spData[idx][i][0]; 
+      x = -spData[idx][i][0];
       y = -spData[idx][i][1];
-      size = spData[idx][i][2]; 
+      size = spData[idx][i][2];
       length = spData[idx][i][3];
-      size *= 0.66f; 
+      size *= 0.66f;
       length *= 0.6f;
-      x = -x; 
+      x = -x;
       y = y;
       deg %= 180;
-      if (deg <= 45 || deg > 135) 
+      if (deg <= 45 || deg > 135)
 	drawBox(x, y, size, length);
-      else 
+      else
 	drawBox(x, y, length, size);
-    }    
+    }
   }
 
   public static void createDisplayLists() {
@@ -154,7 +154,7 @@ public class LetterRender {
     glDeleteLists(displayListIdx, 39);
   }
 
-  private static float[5][16][] spData = 
+  private static float[5][16][] spData =
     [[
      [0, 1.15f, 0.65f, 0.3f, 0],
      [-0.6f, 0.55f, 0.65f, 0.3f, 90], [0.6f, 0.55f, 0.65f, 0.3f, 90],

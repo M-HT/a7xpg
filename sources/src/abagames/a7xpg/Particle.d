@@ -5,11 +5,11 @@
  */
 module abagames.a7xpg.Particle;
 
-import math;
+import std.math;
 import opengl;
 import abagames.util.Vector;
 import abagames.util.Rand;
-import abagames.util.ActorInitializer;
+import abagames.util.Actor;
 import abagames.a7xpg.LuminousActor;
 import abagames.a7xpg.Field;
 import abagames.a7xpg.A7xScreen;
@@ -34,7 +34,7 @@ public class Particle: LuminousActor {
   }
 
   public override void init(ActorInitializer ini) {
-    ParticleInitializer pi = (ParticleInitializer) ini;
+    ParticleInitializer pi = cast(ParticleInitializer) ini;
     field = pi.field;
     rand = pi.rand;
     pos = new Vector;

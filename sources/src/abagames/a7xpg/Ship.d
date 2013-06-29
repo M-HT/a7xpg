@@ -5,7 +5,7 @@
  */
 module abagames.a7xpg.Ship;
 
-import math;
+import std.math;
 import opengl;
 import abagames.util.Vector;
 import abagames.util.Rand;
@@ -79,7 +79,7 @@ public class Ship {
     cnt = -RESTART_CNT;
   }
 
-  private const int[] ENEMY_SCORE_TABLE = 
+  private const int[] ENEMY_SCORE_TABLE =
     [100, 200, 400, 800, 1600, 3200, 4850, 5730, 7650, 8560];
 
   public void destroyEnemy() {
@@ -119,23 +119,23 @@ public class Ship {
     int pad = input.getPadState();
     if (pad & Input.PAD_UP) {
       if (pad & Input.PAD_RIGHT)
-	deg = math.PI / 4;
+	deg = std.math.PI / 4;
       else if (pad & Input.PAD_LEFT)
-	deg = math.PI / 4 * 7;
-      else 
+	deg = std.math.PI / 4 * 7;
+      else
 	deg = 0;
     } else if (pad & Input.PAD_DOWN) {
       if (pad & Input.PAD_RIGHT)
-	deg = math.PI / 4 * 3;
+	deg = std.math.PI / 4 * 3;
       else if (pad & Input.PAD_LEFT)
-	deg = math.PI / 4 * 5;
-      else 
-	deg = math.PI / 4 * 4;
+	deg = std.math.PI / 4 * 5;
+      else
+	deg = std.math.PI / 4 * 4;
     } else {
       if (pad & Input.PAD_RIGHT)
-	deg = math.PI / 4 * 2;
+	deg = std.math.PI / 4 * 2;
       else if (pad & Input.PAD_LEFT)
-	deg = math.PI / 4 * 6;
+	deg = std.math.PI / 4 * 6;
     }
     int btn = input.getButtonState();
     if (btn & (Input.PAD_BUTTON1 | Input.PAD_BUTTON2)) {
@@ -180,7 +180,7 @@ public class Ship {
 	invincible = true;
 	enemyDstCnt = 0;
 	for (int i = 0; i < 50; i++) {
-	  manager.addParticle(pos, rand.nextFloat(math.PI * 2), SIZE, rand.nextFloat(4),
+	  manager.addParticle(pos, rand.nextFloat(std.math.PI * 2), SIZE, rand.nextFloat(4),
 			      0.9, 0.5, 0.5);
 	}
       }
@@ -228,16 +228,16 @@ public class Ship {
     for (int i = 0; i < prtNum; i++) {
       float pr, pg, pb;
       if (invincible) {
-	pr = 0.3 + 0.6 * gauge / GAUGE_MAX; 
-	pg = 0.4; 
-	pb = 0.9 - 0.6 * gauge / GAUGE_MAX; 
+	pr = 0.3 + 0.6 * gauge / GAUGE_MAX;
+	pg = 0.4;
+	pb = 0.9 - 0.6 * gauge / GAUGE_MAX;
       } else {
 	pr = 0.3; pg = 0.3; pb = 0.9;
       }
-      manager.addParticle(pos, deg + math.PI + rand.nextFloat(0.5) - 0.25, SIZE, ps, pr, pg, pb);
+      manager.addParticle(pos, deg + std.math.PI + rand.nextFloat(0.5) - 0.25, SIZE, ps, pr, pg, pb);
     }
     if (hitWall && pSpeed > DEFAULT_SPEED * 1.1) {
-      int pn = pSpeed / (DEFAULT_SPEED / 4);
+      int pn = cast(int)(pSpeed / (DEFAULT_SPEED / 4));
       for (int i = 0; i < pn; i++) {
 	manager.addParticle(pos, deg + rand.nextFloat(1.2) - 0.6, SIZE, pSpeed * 3,
 			    0.8, 0.6, 0.1);
@@ -259,7 +259,7 @@ public class Ship {
       return;
     glPushMatrix();
     glTranslatef(pos.x, pos.y, 0.5);
-    glRotatef(-deg * 180 / math.PI, 0, 0, 1);
+    glRotatef(-deg * 180 / std.math.PI, 0, 0, 1);
     glCallList(displayListIdx);
     glCallList(displayListIdx + 1);
     glTranslatef(0, 0, -0.5);
@@ -273,7 +273,7 @@ public class Ship {
       return;
     glPushMatrix();
     glTranslatef(pos.x, pos.y, 0.5);
-    glRotatef(-deg * 180 / math.PI, 0, 0, 1);
+    glRotatef(-deg * 180 / std.math.PI, 0, 0, 1);
     if (invincible)
       glCallList(displayListIdx + 2);
     else
@@ -341,15 +341,15 @@ public class Ship {
     float d = atan2(pos.x - p.x, pos.y - p.y);
     float wd = d;
     if (d < 0)
-      d += math.PI * 2;
+      d += std.math.PI * 2;
     d -= deg;
-    if (d < -math.PI)
-      d += math.PI * 2;
-    else if (d > math.PI)
-      d -= math.PI * 2;
+    if (d < -std.math.PI)
+      d += std.math.PI * 2;
+    else if (d > std.math.PI)
+      d -= std.math.PI * 2;
     if (d < 0)
       d = -d;
-    if (d > math.PI / 4)
+    if (d > std.math.PI / 4)
       return;
     d *= 2; d++;
     float ds = pos.dist(p);

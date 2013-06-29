@@ -5,7 +5,7 @@
  */
 module abagames.util.Vector;
 
-import math;
+import std.math;
 
 /**
  * Vector.
@@ -34,7 +34,7 @@ public class Vector {
       rsl.x = mag * v.x / ll;
       rsl.y = mag * v.y / ll;
     } else {
-      rsl.x = rsl.y = 0; 
+      rsl.x = rsl.y = 0;
     }
     return rsl;
   }
@@ -49,30 +49,30 @@ public class Vector {
     y -= v.y;
   }
 
-  public void mul(float a) {	
+  public void mul(float a) {
     x *= a;
     y *= a;
   }
 
-  public void div(float a) {	
+  public void div(float a) {
     x /= a;
     y /= a;
   }
 
   public int checkSide(Vector pos1, Vector pos2) {
-    int xo = pos2.x - pos1.x;
-    int yo = pos2.y - pos1.y;
+    int xo = cast(int)(pos2.x - pos1.x);
+    int yo = cast(int)(pos2.y - pos1.y);
     if (xo == 0) {
       if (yo == 0)
 	return 0;
-      return x - pos1.x;
+      return cast(int)(x - pos1.x);
     } else if (yo == 0) {
-      return pos1.y - y;
+      return cast(int)(pos1.y - y);
     } else {
-      if (xo * yo > 0) { 
-	return (x - pos1.x) / xo - (y - pos1.y) / yo;
+      if (xo * yo > 0) {
+	return cast(int)((x - pos1.x) / xo - (y - pos1.y) / yo);
       } else {
-	return -(x - pos1.x) / xo + (y - pos1.y) / yo;
+	return cast(int)(-(x - pos1.x) / xo + (y - pos1.y) / yo);
       }
     }
   }

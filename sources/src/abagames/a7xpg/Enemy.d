@@ -5,11 +5,12 @@
  */
 module abagames.a7xpg.Enemy;
 
-import math;
+import std.math;
 import opengl;
 import abagames.util.Vector;
 import abagames.util.Rand;
-import abagames.util.ActorInitializer;
+import abagames.util.Actor;
+import abagames.a7xpg.Field;
 import abagames.a7xpg.LuminousActor;
 import abagames.a7xpg.Ship;
 import abagames.a7xpg.A7xGameManager;
@@ -48,7 +49,7 @@ public class Enemy: LuminousActor {
   }
 
   public override void init(ActorInitializer ini) {
-    EnemyInitializer ei = (EnemyInitializer) ini;
+    EnemyInitializer ei = cast(EnemyInitializer) ini;
     ship = ei.ship;
     field = ei.field;
     rand = ei.rand;
@@ -89,32 +90,32 @@ public class Enemy: LuminousActor {
     isExist = true;
     switch (type) {
     case 0:
-      deg = math.PI / 2 * rand.nextInt(4);
+      deg = std.math.PI / 2 * rand.nextInt(4);
       break;
     case 1:
-      deg = math.PI / 4 * rand.nextInt(8);
+      deg = std.math.PI / 4 * rand.nextInt(8);
       break;
     case 2:
       chaseType = 0;
-      deg = math.PI / 2 * rand.nextInt(4);
+      deg = std.math.PI / 2 * rand.nextInt(4);
       break;
     case 3:
       vel.x = vel.y = 0;
-      deg = rand.nextFloat(math.PI * 2);
+      deg = rand.nextFloat(std.math.PI * 2);
       break;
     case 4:
-      deg = rand.nextFloat(math.PI * 2);
+      deg = rand.nextFloat(std.math.PI * 2);
       vel.x = sin(deg) * speed;
       vel.y = cos(deg) * speed;
-      armDeg = rand.nextFloat(math.PI * 2);
-      if (rand.nextInt(2) == 0) 
+      armDeg = rand.nextFloat(std.math.PI * 2);
+      if (rand.nextInt(2) == 0)
 	armDegMv = rand.nextFloat(0.01) + 0.02;
       else
 	armDegMv = -rand.nextFloat(0.01) - 0.02;
       break;
     case 5:
       posHstIdx = POSITION_HISTORY_LENGTH;
-      deg = math.PI / 2 * rand.nextInt(4);
+      deg = std.math.PI / 2 * rand.nextInt(4);
       for (int i = 0; i < POSITION_HISTORY_LENGTH; i++) {
 	posHst[i].x = pos.x;
 	posHst[i].y = pos.y;
@@ -126,7 +127,7 @@ public class Enemy: LuminousActor {
     }
   }
 
-  private float[][] enemyColor = 
+  private float[][] enemyColor =
     [
      [0.9, 0.2, 0.2],
      [0.7, 0.3, 0.6],
@@ -140,7 +141,7 @@ public class Enemy: LuminousActor {
     if (ship.invincible) {
       manager.playSe(6);
       for (int i = 0; i < 60; i++) {
-	manager.addParticle(pos, rand.nextFloat(math.PI * 2), size, rand.nextFloat(0.5),
+	manager.addParticle(pos, rand.nextFloat(std.math.PI * 2), size, rand.nextFloat(0.5),
 			    enemyColor[type][0], enemyColor[type][1], enemyColor[type][2]);
       }
       ship.destroyEnemy();
@@ -148,7 +149,7 @@ public class Enemy: LuminousActor {
       cnt = -DESTROYED_CNT;
     } else if (!ship.restart) {
       for (int i = 0; i < 100; i++) {
-	manager.addParticle(pos, rand.nextFloat(math.PI * 2), size, rand.nextFloat(1),
+	manager.addParticle(pos, rand.nextFloat(std.math.PI * 2), size, rand.nextFloat(1),
 			    0.3, 1, 0.2);
       }
       ship.miss();
@@ -160,16 +161,16 @@ public class Enemy: LuminousActor {
     turnDist -= speed;
     if (hitWall) {
       turnDist = (rand.nextInt(60) + 60) * 0.2;
-      if (deg < math.PI / 4 * 1 || (deg > math.PI / 4 * 3 && deg < math.PI / 4 * 5)) {
+      if (deg < std.math.PI / 4 * 1 || (deg > std.math.PI / 4 * 3 && deg < std.math.PI / 4 * 5)) {
 	if (ship.pos.x < pos.x)
-	  deg = math.PI / 4 * 6;
-	else 
-	  deg = math.PI / 4 * 2;
+	  deg = std.math.PI / 4 * 6;
+	else
+	  deg = std.math.PI / 4 * 2;
       } else {
 	if (ship.pos.y < pos.y)
-	  deg = math.PI / 4 * 4;
-	else 
-	  deg = math.PI / 4 * 0;
+	  deg = std.math.PI / 4 * 4;
+	else
+	  deg = std.math.PI / 4 * 0;
       }
     }
     if (cnt < APPEAR_CNT)
@@ -177,21 +178,21 @@ public class Enemy: LuminousActor {
     if (turnDist <= 0) {
       turnDist = (rand.nextInt(90) + 60) * 0.2;
       float od = atan2(ship.pos.x - pos.x, ship.pos.y - pos.y);
-      if (od < -math.PI / 4 * 3) 
-	deg = math.PI / 4 * 4;
-      else if (od < -math.PI / 4 * 1) 
-	deg = math.PI / 4 * 6;
-      else if (od < math.PI / 4 * 1) 
-	deg = math.PI / 4 * 0;
-      else 
-	deg = math.PI / 4 * 2;
+      if (od < -std.math.PI / 4 * 3)
+	deg = std.math.PI / 4 * 4;
+      else if (od < -std.math.PI / 4 * 1)
+	deg = std.math.PI / 4 * 6;
+      else if (od < std.math.PI / 4 * 1)
+	deg = std.math.PI / 4 * 0;
+      else
+	deg = std.math.PI / 4 * 2;
     }
     if (rand.nextInt(9) == 0) {
-      manager.addParticle(pos, deg + math.PI + math.PI / 7 + rand.nextFloat(0.2) - 0.1, 
+      manager.addParticle(pos, deg + std.math.PI + std.math.PI / 7 + rand.nextFloat(0.2) - 0.1,
 			  size, speed * 2, 0.9, 0.3, 0.3);
     }
     if (rand.nextInt(9) == 0) {
-      manager.addParticle(pos, deg + math.PI - math.PI / 7 + rand.nextFloat(0.2) - 0.1, 
+      manager.addParticle(pos, deg + std.math.PI - std.math.PI / 7 + rand.nextFloat(0.2) - 0.1,
 			  size, speed * 2, 0.9, 0.3, 0.3);
     }
     if (ship.checkHit(pos.x, pos.y - size * 0.8, pos.x, pos.y + size * 0.8) ||
@@ -203,9 +204,9 @@ public class Enemy: LuminousActor {
   private void moveType1() {
     turnDist -= speed;
     if (hitWall) {
-      deg += math.PI;
-      if (deg >= math.PI * 2)
-	deg -= math.PI * 2;
+      deg += std.math.PI;
+      if (deg >= std.math.PI * 2)
+	deg -= std.math.PI * 2;
     }
     if (cnt < APPEAR_CNT)
       return;
@@ -213,22 +214,22 @@ public class Enemy: LuminousActor {
       turnDist = (rand.nextInt(40) + 8) * 0.2;
       float od = atan2(ship.pos.x - pos.x, ship.pos.y - pos.y);
       if (od < 0)
-	od += math.PI * 2;
+	od += std.math.PI * 2;
       od -= deg;
-      if (od > -math.PI / 8 && od < math.PI / 8) {
-      } else if (od < -math.PI / 8 * 15 || od > math.PI / 8 * 15) {
-      } else if ((od > -math.PI && od < 0) || od > math.PI) {
-	deg -= math.PI / 4;
+      if (od > -std.math.PI / 8 && od < std.math.PI / 8) {
+      } else if (od < -std.math.PI / 8 * 15 || od > std.math.PI / 8 * 15) {
+      } else if ((od > -std.math.PI && od < 0) || od > std.math.PI) {
+	deg -= std.math.PI / 4;
 	if (deg < 0)
-	  deg += math.PI * 2;
+	  deg += std.math.PI * 2;
       } else {
-	deg += math.PI / 4;
-	if (deg >= math.PI * 2)
-	  deg -= math.PI * 2;
+	deg += std.math.PI / 4;
+	if (deg >= std.math.PI * 2)
+	  deg -= std.math.PI * 2;
       }
     }
     if (rand.nextInt(4) == 0) {
-      manager.addParticle(pos, deg + math.PI + rand.nextFloat(0.2) - 0.1, 
+      manager.addParticle(pos, deg + std.math.PI + rand.nextFloat(0.2) - 0.1,
 			  size, speed * 2.5, 0.8, 0.4, 0.5);
     }
     if (ship.checkHit(pos.x, pos.y - size * 0.8, pos.x, pos.y + size * 0.8) ||
@@ -241,15 +242,15 @@ public class Enemy: LuminousActor {
     if (hitWall) {
       if ((hitWallType & 1) == 1) {
 	float od = atan2(ship.pos.x - pos.x, ship.pos.y - pos.y);
-	if (od > -math.PI / 2 && od <= math.PI / 2) {
+	if (od > -std.math.PI / 2 && od <= std.math.PI / 2) {
 	  if (chaseType > 0)
 	    deg = 0;
 	  else
-	    deg = math.PI / 2 * 2;
+	    deg = std.math.PI / 2 * 2;
 	  chaseType++;
 	} else {
 	  if (chaseType > 0)
-	    deg = math.PI / 2 * 2;
+	    deg = std.math.PI / 2 * 2;
 	  else
 	    deg = 0;
 	  chaseType++;
@@ -259,15 +260,15 @@ public class Enemy: LuminousActor {
 	float od = atan2(ship.pos.x - pos.x, ship.pos.y - pos.y);
 	if (od < 0) {
 	  if (chaseType > 0)
-	    deg = math.PI / 2 * 3;
+	    deg = std.math.PI / 2 * 3;
 	  else
-	    deg = math.PI / 2;
+	    deg = std.math.PI / 2;
 	  chaseType++;
 	} else {
 	  if (chaseType > 0)
-	    deg = math.PI / 2;
+	    deg = std.math.PI / 2;
 	  else
-	    deg = math.PI / 2 * 3;
+	    deg = std.math.PI / 2 * 3;
 	  chaseType++;
 	}
       }
@@ -275,31 +276,31 @@ public class Enemy: LuminousActor {
       if (deg < 0.1) {
 	if (ship.pos.y <= pos.y) {
 	  if (ship.pos.x < pos.x)
-	    deg = math.PI / 2 * 3;
+	    deg = std.math.PI / 2 * 3;
 	  else
-	    deg = math.PI / 2;
+	    deg = std.math.PI / 2;
 	  chaseType = 0;
 	}
-      } else if (deg > math.PI / 2 - 0.1 && deg < math.PI / 2 + 0.1) {
+      } else if (deg > std.math.PI / 2 - 0.1 && deg < std.math.PI / 2 + 0.1) {
 	if (ship.pos.x <= pos.x) {
 	  if (ship.pos.y < pos.y)
-	    deg = math.PI / 2 * 2;
+	    deg = std.math.PI / 2 * 2;
 	  else
 	    deg = 0;
 	  chaseType = 0;
 	}
-      } else if (deg > math.PI / 2 * 2 - 0.1 && deg < math.PI / 2 * 2 + 0.1) {
+      } else if (deg > std.math.PI / 2 * 2 - 0.1 && deg < std.math.PI / 2 * 2 + 0.1) {
 	if (ship.pos.y >= pos.y) {
 	  if (ship.pos.x < pos.x)
-	    deg = math.PI / 2 * 3;
+	    deg = std.math.PI / 2 * 3;
 	  else
-	    deg = math.PI / 2;
+	    deg = std.math.PI / 2;
 	  chaseType = 0;
 	}
-      } else if (deg > math.PI / 2 * 3 - 0.1 && deg < math.PI / 2 * 3 + 0.1) {
+      } else if (deg > std.math.PI / 2 * 3 - 0.1 && deg < std.math.PI / 2 * 3 + 0.1) {
 	if (ship.pos.x >= pos.x) {
 	  if (ship.pos.y < pos.y)
-	    deg = math.PI / 2 * 2;
+	    deg = std.math.PI / 2 * 2;
 	  else
 	    deg = 0;
 	  chaseType = 0;
@@ -309,11 +310,11 @@ public class Enemy: LuminousActor {
     if (cnt < APPEAR_CNT)
       return;
     if (rand.nextInt(9) == 0) {
-      manager.addParticle(pos, deg + math.PI + math.PI / 12 + rand.nextFloat(0.2) - 0.1, 
+      manager.addParticle(pos, deg + std.math.PI + std.math.PI / 12 + rand.nextFloat(0.2) - 0.1,
 			  size, speed * 2, 0.3, 0.9, 0.3);
     }
     if (rand.nextInt(9) == 0) {
-      manager.addParticle(pos, deg + math.PI - math.PI / 12 + rand.nextFloat(0.2) - 0.1, 
+      manager.addParticle(pos, deg + std.math.PI - std.math.PI / 12 + rand.nextFloat(0.2) - 0.1,
 			  size, speed * 2, 0.3, 0.9, 0.3);
     }
     if (ship.checkHit(pos.x, pos.y - size * 0.8, pos.x, pos.y + size * 0.8) ||
@@ -347,7 +348,7 @@ public class Enemy: LuminousActor {
     if (cnt < APPEAR_CNT)
       return;
     if (rand.nextInt(4) == 0) {
-      manager.addParticle(pos, rand.nextFloat(math.PI * 2), 
+      manager.addParticle(pos, rand.nextFloat(std.math.PI * 2),
 			  size, speed, 0.9, 0.3, 0.6);
     }
     if (ship.checkHit(pos.x, pos.y - size * 0.8, pos.x, pos.y + size * 0.8) ||
@@ -381,11 +382,11 @@ public class Enemy: LuminousActor {
     if (cnt < APPEAR_CNT)
       return;
     if (rand.nextInt(7) == 0) {
-      manager.addParticle(pos, armDeg + rand.nextFloat(0.2) - 0.1, 
+      manager.addParticle(pos, armDeg + rand.nextFloat(0.2) - 0.1,
 			  1, speed * 2, 0.5, 0.9, 0.3);
     }
     if (rand.nextInt(7) == 0) {
-      manager.addParticle(pos, armDeg + math.PI + rand.nextFloat(0.2) - 0.1, 
+      manager.addParticle(pos, armDeg + std.math.PI + rand.nextFloat(0.2) - 0.1,
 			  1, speed * 2, 0.5, 0.9, 0.3);
     }
     float ax = size * sin(armDeg) * 0.9;
@@ -398,32 +399,32 @@ public class Enemy: LuminousActor {
   private void moveType5() {
     turnDist -= speed;
     if (hitWall) {
-      deg += math.PI;
-      if (deg >= math.PI * 2)
-	deg -= math.PI * 2;
-    } 
+      deg += std.math.PI;
+      if (deg >= std.math.PI * 2)
+	deg -= std.math.PI * 2;
+    }
     if (cnt < APPEAR_CNT)
       return;
     if (!hitWall && turnDist <= 0) {
       turnDist = (rand.nextInt(24) + 16) * 0.2;
       float od = atan2(ship.pos.x - pos.x, ship.pos.y - pos.y);
       if (od < 0)
-	od += math.PI * 2;
+	od += std.math.PI * 2;
       od -= deg;
-      if (od > -math.PI / 8 && od < math.PI / 8) {
-      } else if (od < -math.PI / 8 * 15 || od > math.PI / 8 * 15) {
-      } else if ((od > -math.PI && od < 0) || od > math.PI) {
-	deg -= math.PI / 2;
+      if (od > -std.math.PI / 8 && od < std.math.PI / 8) {
+      } else if (od < -std.math.PI / 8 * 15 || od > std.math.PI / 8 * 15) {
+      } else if ((od > -std.math.PI && od < 0) || od > std.math.PI) {
+	deg -= std.math.PI / 2;
 	if (deg < 0)
-	  deg += math.PI * 2;
+	  deg += std.math.PI * 2;
       } else {
-	deg += math.PI / 2;
-	if (deg >= math.PI * 2)
-	  deg -= math.PI * 2;
+	deg += std.math.PI / 2;
+	if (deg >= std.math.PI * 2)
+	  deg -= std.math.PI * 2;
       }
     }
     if (rand.nextInt(4) == 0) {
-      manager.addParticle(pos, deg + math.PI + rand.nextFloat(0.2) - 0.1, 
+      manager.addParticle(pos, deg + std.math.PI + rand.nextFloat(0.2) - 0.1,
 			  0, speed * 5, 0.5, 0.3, 0.9);
     }
     int hi = posHstIdx;
@@ -485,7 +486,7 @@ public class Enemy: LuminousActor {
       if (type < 4) {
 	blowedVel.mul(-0.7);
       }
-      if (type != 4) { 
+      if (type != 4) {
 	pos.x = ppos.x; pos.y = ppos.y;
       }
     }
@@ -524,7 +525,7 @@ public class Enemy: LuminousActor {
       sz = size;
     glPushMatrix();
     glTranslatef(pos.x, pos.y, 0.5);
-    glRotatef(-deg * 180 / math.PI, 0, 0, 1);
+    glRotatef(-deg * 180 / std.math.PI, 0, 0, 1);
     glScalef(sz, sz, sz);
     glCallList(displayListIdx + type * 3);
     glCallList(displayListIdx + type * 3 + 1);
@@ -557,7 +558,7 @@ public class Enemy: LuminousActor {
       sz = size;
     glPushMatrix();
     glTranslatef(pos.x, pos.y, 0.5);
-    glRotatef(-armDeg * 180 / math.PI, 0, 0, 1);
+    glRotatef(-armDeg * 180 / std.math.PI, 0, 0, 1);
     glBegin(GL_TRIANGLE_FAN);
     A7xScreen.setColor(0.7, 0.9, 0.3, 0.3);
     glVertex3f(0, 0, 0.5);
@@ -593,7 +594,7 @@ public class Enemy: LuminousActor {
     for (int i = 0; i < 5; i++) {
       glPushMatrix();
       glTranslatef(posHst[hi].x, posHst[hi].y, 0.5);
-      glRotatef(-degHst[hi] * 180 / math.PI, 0, 0, 1);
+      glRotatef(-degHst[hi] * 180 / std.math.PI, 0, 0, 1);
       glScalef(sz, sz, sz);
       glCallList(displayListIdx + 5 * 3);
       glCallList(displayListIdx + 5 * 3 + 1);
@@ -625,7 +626,7 @@ public class Enemy: LuminousActor {
   private void drawType0Luminous() {
     glPushMatrix();
     glTranslatef(pos.x, pos.y, 0.5);
-    glRotatef(-deg * 180 / math.PI, 0, 0, 1);
+    glRotatef(-deg * 180 / std.math.PI, 0, 0, 1);
     glScalef(size, size, size);
     glCallList(displayListIdx + type * 3 + 1);
     glPopMatrix();
@@ -641,7 +642,7 @@ public class Enemy: LuminousActor {
   private void drawArmLuminous() {
     glPushMatrix();
     glTranslatef(pos.x, pos.y, 0.5);
-    glRotatef(-armDeg * 180 / math.PI, 0, 0, 1);
+    glRotatef(-armDeg * 180 / std.math.PI, 0, 0, 1);
     glBegin(GL_LINE_STRIP);
     A7xScreen.setColor(0.5, 0.9, 0.3, 0.9);
     glVertex3f(-0.5, 0, 0.5);

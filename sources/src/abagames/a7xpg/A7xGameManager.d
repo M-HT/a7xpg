@@ -5,12 +5,13 @@
  */
 module abagames.a7xpg.A7xGameManager;
 
-import math;
+import std.math;
 import opengl;
 import SDL;
 import abagames.util.Rand;
 import abagames.util.GameManager;
 import abagames.util.ActorPool;
+import abagames.util.Vector;
 import abagames.util.sdl.Screen3D;
 import abagames.util.sdl.Texture;
 import abagames.util.sdl.Input;
@@ -68,7 +69,7 @@ public class A7xGameManager: GameManager {
   Texture titleTexture;
 
   const int STAGE_NUM = 30;
-  float[][STAGE_NUM] stgData = 
+  float[][STAGE_NUM] stgData =
     [
      // width, height, time, #gold, #gold on field, interval enemy appearing, [enemy data]
      // [enemy data] = #, type, size, speed
@@ -104,19 +105,19 @@ public class A7xGameManager: GameManager {
 
      [24, 18, 50, 20, 2, 75, 1, 0, 1, 0.4, 1, 0, 1.25, 0.35, 1, 0, 1.5, 0.3, 1, 0, 1.75, 0.25,
      1, 0, 2, 0.2, 1, 0, 2.25, 0.15, 1, 0, 2.5, 0.1],
-     [29, 25, 60, 25, 3, 100, 1, 4, 15, 0.25, 1, 4, 10, 0.3, 
+     [29, 25, 60, 25, 3, 100, 1, 4, 15, 0.25, 1, 4, 10, 0.3,
      1, 3, 2, 0.35, 1, 5, 1.5, 0.35, 1, 1, 2, 0.35, 4, 0, 1, 0.3],
      [20, 24, 40, 15, 1, 120, 7, 4, 2, 0.6],
      [22, 22, 60, 30, 5, 100, 4, 4, 8, 0.3, 4, 3, 2, 0.4],
-     [24, 18, 40, 10, 1, 20, 4, 0, 1, 0.2, 3, 1, 1, 0.25, 2, 2, 1, 0.3, 1, 3, 1, 0.3, 
+     [24, 18, 40, 10, 1, 20, 4, 0, 1, 0.2, 3, 1, 1, 0.25, 2, 2, 1, 0.3, 1, 3, 1, 0.3,
      1, 4, 3, 0.3, 1, 5, 1, 0.2],
     ];
   float[3][ENEMY_MAX] enemyTable;
   int enemyTableIdx, enemyNum;
 
   public override void init() {
-    prefManager = (A7xPrefManager) abstPrefManager;
-    screen = (A7xScreen) abstScreen;
+    prefManager = cast(A7xPrefManager) abstPrefManager;
+    screen = cast(A7xScreen) abstScreen;
     screen.makeLuminousTexture();
     rand = new Rand;
     field = new Field;
@@ -125,18 +126,18 @@ public class A7xGameManager: GameManager {
     ship = new Ship;
     ship.init(input, field, this);
     Gold.createDisplayLists();
-    auto Gold goldClass = new Gold;
-    auto GoldInitializer gi = new GoldInitializer(ship, field, rand, this);
+    scope Gold goldClass = new Gold;
+    scope GoldInitializer gi = new GoldInitializer(ship, field, rand, this);
     golds = new LuminousActorPool(16, goldClass, gi);
     Enemy.createDisplayLists();
-    auto Enemy enemyClass = new Enemy;
-    auto EnemyInitializer ei = new EnemyInitializer(ship, field, rand, this);
+    scope Enemy enemyClass = new Enemy;
+    scope EnemyInitializer ei = new EnemyInitializer(ship, field, rand, this);
     enemies = new LuminousActorPool(ENEMY_MAX, enemyClass, ei);
-    auto Particle particleClass = new Particle;
-    auto ParticleInitializer pi = new ParticleInitializer(field, rand);
+    scope Particle particleClass = new Particle;
+    scope ParticleInitializer pi = new ParticleInitializer(field, rand);
     particles = new LuminousActorPool(256, particleClass, pi);
-    auto Bonus bonusClass = new Bonus;
-    auto BonusInitializer bi = new BonusInitializer();
+    scope Bonus bonusClass = new Bonus;
+    scope BonusInitializer bi = new BonusInitializer();
     bonuses = new ActorPool(8, bonusClass, bi);
     LetterRender.createDisplayLists();
     for (int i = 0; i < bgm.length; i++)
@@ -189,7 +190,7 @@ public class A7xGameManager: GameManager {
   }
 
   public void addGold() {
-    Gold gold = (Gold) golds.getInstance();
+    Gold gold = cast(Gold) golds.getInstance();
     assert(gold);
     gold.set();
   }
@@ -210,14 +211,14 @@ public class A7xGameManager: GameManager {
 
   public void addBonus(int sc, Vector pos, float size) {
     addScore(sc);
-    Bonus bonus = (Bonus) bonuses.getInstanceForced();
+    Bonus bonus = cast(Bonus) bonuses.getInstanceForced();
     assert(bonus);
     bonus.set(sc, pos, size);
   }
 
   public void getGold() {
     playSe(0);
-    addBonus(((int)(ship.speed / (ship.DEFAULT_SPEED / 2))) * 10, ship.pos, 0.7);
+    addBonus((cast(int)(ship.speed / (ship.DEFAULT_SPEED / 2))) * 10, ship.pos, 0.7);
     leftGold--;
     if (leftGold - appGold >= 0)
       addGold();
@@ -235,14 +236,14 @@ public class A7xGameManager: GameManager {
 
   public void addEnemy(int type, float size, float speed) {
     playSe(5);
-    Enemy enemy = (Enemy) enemies.getInstance();
+    Enemy enemy = cast(Enemy) enemies.getInstance();
     if (!enemy) return;
     enemy.set(type, size, speed);
   }
 
   public void addParticle(Vector pos, float deg, float ofs, float speed,
 			  float r, float g, float b) {
-    Particle pt = (Particle) particles.getInstanceForced();
+    Particle pt = cast(Particle) particles.getInstanceForced();
     assert(pt);
     pt.set(pos, deg, ofs, speed, r, g, b);
   }
@@ -254,16 +255,16 @@ public class A7xGameManager: GameManager {
     field.size.y = stgData[st][1];
     field.eyeZ = 300;
     field.alpha = 1;
-    stageTimer = stgData[st][2] * 60;
-    leftGold = stgData[st][3];
-    appGold = stgData[st][4];
-    enemyAppInterval = stgData[st][5];    
+    stageTimer = cast(int)(stgData[st][2] * 60);
+    leftGold = cast(int)(stgData[st][3]);
+    appGold = cast(int)(stgData[st][4]);
+    enemyAppInterval = cast(int)(stgData[st][5]);
     int ei = 0;
     for (int i = 6; i < stgData[st].length;) {
-      int n = stgData[st][i]; i++;
-      int tp = stgData[st][i]; i++;
-      float sz = stgData[st][i]; i++; 
-      float sp = stgData[st][i]; i++; 
+      int n = cast(int)(stgData[st][i]); i++;
+      int tp = cast(int)(stgData[st][i]); i++;
+      float sz = stgData[st][i]; i++;
+      float sp = stgData[st][i]; i++;
       for (int j = 0; j < n; j++) {
 	enemyTable[ei][0] = tp;
 	enemyTable[ei][1] = sz;
@@ -374,7 +375,7 @@ public class A7xGameManager: GameManager {
       if (enemyTableIdx == 0 && lap >= 1) {
 	int ei = enemyNum - 1;
 	for (int i = 0; i < lap * 2; i++) {
-	  addEnemy(enemyTable[ei][0],
+	  addEnemy(cast(int)(enemyTable[ei][0]),
 		   enemyTable[ei][1] * (1 + lap * 0.1),
 		   enemyTable[ei][2] * (1 + lap * 0.1));
 	  ei--;
@@ -383,7 +384,7 @@ public class A7xGameManager: GameManager {
 	}
       }
       enemyTimer = enemyAppInterval;
-      addEnemy(enemyTable[enemyTableIdx][0],
+      addEnemy(cast(int)(enemyTable[enemyTableIdx][0]),
 	       enemyTable[enemyTableIdx][1],
 	       enemyTable[enemyTableIdx][2]);
       enemyTableIdx++;
@@ -500,7 +501,7 @@ public class A7xGameManager: GameManager {
 	startTitle();
     } else if (cnt > 500) {
 	startTitle();
-    } 
+    }
     field.addSpeed(ship.DEFAULT_SPEED / 2);
     field.move();
     enemies.move();

@@ -5,6 +5,7 @@
  */
 module abagames.a7xpg.A7xScreen;
 
+import std.c.string;
 import opengl;
 import abagames.util.sdl.Screen3D;
 
@@ -19,7 +20,7 @@ public class A7xScreen: Screen3D {
 
   protected override void init() {
     setCaption(CAPTION);
-    
+
     glLineWidth(1);
     glEnable(GL_LINE_SMOOTH);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
@@ -28,7 +29,7 @@ public class A7xScreen: Screen3D {
     glDisable(GL_CULL_FACE);
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_TEXTURE_2D);
-    glDisable(GL_COLOR_MATERIAL);    
+    glDisable(GL_COLOR_MATERIAL);
   }
 
   protected override void close() {
@@ -40,13 +41,13 @@ public class A7xScreen: Screen3D {
   GLuint luminousTexture;
   const int LUMINOUS_TEXTURE_WIDTH_MAX = 128;
   const int LUMINOUS_TEXTURE_HEIGHT_MAX = 128;
-  GLuint td[LUMINOUS_TEXTURE_WIDTH_MAX * LUMINOUS_TEXTURE_HEIGHT_MAX * 4 * uint.size];
+  GLuint td[LUMINOUS_TEXTURE_WIDTH_MAX * LUMINOUS_TEXTURE_HEIGHT_MAX * 4 * uint.sizeof];
   int luminousTextureWidth = 128, luminousTextureHeight = 128;
 
   public void makeLuminousTexture() {
-    uint *data = td;
+    uint *data = td.ptr;
     int i;
-    memset(data, 0, luminousTextureWidth * luminousTextureHeight * 4 * uint.size);
+    memset(data, 0, luminousTextureWidth * luminousTextureHeight * 4 * uint.sizeof);
     glGenTextures(1, &luminousTexture);
     glBindTexture(GL_TEXTURE_2D, luminousTexture);
     glTexImage2D(GL_TEXTURE_2D, 0, 4, luminousTextureWidth, luminousTextureHeight, 0,
@@ -61,7 +62,7 @@ public class A7xScreen: Screen3D {
 
   public void endRenderToTexture() {
     glBindTexture(GL_TEXTURE_2D, luminousTexture);
-    glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 
+    glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,
 		     0, 0, luminousTextureWidth, luminousTextureHeight, 0);
     glViewport(0, 0, width, height);
   }
@@ -126,7 +127,7 @@ public class A7xScreen: Screen3D {
     glVertex3f(width, height, 0);
     glVertex3f(0, height, 0);
     glEnd();
-    glPopMatrix();    
+    glPopMatrix();
   }
 
   public static void drawBoxLine(float x, float y, float width, float height) {
@@ -138,7 +139,7 @@ public class A7xScreen: Screen3D {
     glVertex3f(width, height, 0);
     glVertex3f(0, height, 0);
     glEnd();
-    glPopMatrix();    
+    glPopMatrix();
   }
 
   public static void setColor(float r, float g, float b, float a) {

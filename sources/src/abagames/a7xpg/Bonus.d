@@ -24,7 +24,7 @@ public class Bonus: Actor {
   public override Actor newActor() {
     return new Bonus;
   }
-  
+
   public override void init(ActorInitializer ini) {
     pos = new Vector;
   }
@@ -36,7 +36,7 @@ public class Bonus: Actor {
       tn /= 10;
     pos.x = p.x - s / 2 * tn; pos.y = p.y;
     size = s;
-    cnt = 32 + s * 24;
+    cnt = 32 + cast(int)(s * 24);
     my = 0.03 + s * 0.2;
     isExist = true;
   }

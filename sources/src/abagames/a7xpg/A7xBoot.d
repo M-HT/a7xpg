@@ -5,13 +5,17 @@
  */
 module abagames.a7xpg.A7xBoot;
 
-import string;
+import std.c.stdlib;
+import std.conv;
+import std.string;
+import std.stdio;
 import abagames.a7xpg.A7xScreen;
 import abagames.a7xpg.A7xGameManager;
 import abagames.a7xpg.A7xPrefManager;
 import abagames.util.Logger;
 import abagames.util.sdl.Input;
 import abagames.util.sdl.MainLoop;
+import abagames.util.sdl.Sound;
 
 /**
  * Boot A7Xpg.
@@ -28,9 +32,8 @@ private void usage() {
     ("Usage: a7xpg [-brightness [0-100]] [-luminous [0-100]] [-nosound] [-window] [-lowres]");
 }
 
-private void parseArgs(char[][] args) {
-  //for (int i = 1; i < argv.length; i++) {
-  for (int i = 0; i < args.length; i++) {
+private void parseArgs(string[] args) {
+  for (int i = 1; i < args.length; i++) {
     switch (args[i]) {
     case "-brightness":
       if (i >= args.length - 1) {
@@ -38,7 +41,7 @@ private void parseArgs(char[][] args) {
 	exit(EXIT_FAILURE);
       }
       i++;
-      float b = (float) atoi(args[i]) / 100;
+      float b = cast(float) to!int(args[i]) / 100;
       if (b < 0 || b > 1) {
 	usage();
 	exit(EXIT_FAILURE);
@@ -51,7 +54,7 @@ private void parseArgs(char[][] args) {
 	exit(EXIT_FAILURE);
       }
       i++;
-      float l = (float) atoi(args[i]) / 100;
+      float l = cast(float) to!int(args[i]) / 100;
       if (l < 0 || l > 1) {
 	usage();
 	exit(EXIT_FAILURE);
@@ -77,9 +80,7 @@ private void parseArgs(char[][] args) {
   }
 }
 
-//public int main(char[][] argc) {
-private int boot(char[] argl) {
-  char[][] args = split(argl);
+private int boot(string[] args) {
   screen = new A7xScreen;
   input = new Input;
   try {
@@ -92,6 +93,15 @@ private int boot(char[] argl) {
   mainLoop.loop();
   return EXIT_SUCCESS;
 }
+
+version (linux) {
+    public int main(string[] args) {
+        return boot(args);
+    }
+}
+
+
+version (Win32) {
 
 // Boot as the windows executable.
 import windows;
@@ -107,17 +117,19 @@ int WinMain(HINSTANCE hInstance,
 	    LPSTR lpCmdLine,
 	    int nCmdShow) {
   int result;
-  
+
   gc_init();
   _minit();
   try {
     _moduleCtor();
-    result = boot(string.toString(lpCmdLine));
+    result = boot(split(to!string(lpCmdLine)));
   } catch (Object o) {
-    MessageBoxA(null, (char *)o.toString(), "Error",
+    MessageBoxA(null, cast(char *)o.toString(), "Error",
 		MB_OK | MB_ICONEXCLAMATION);
     result = 0;
   }
   gc_term();
   return result;
+}
+
 }

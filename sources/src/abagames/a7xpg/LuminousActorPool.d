@@ -21,7 +21,7 @@ public class LuminousActorPool: ActorPool {
   public void drawLuminous() {
     for (int i = 0; i < actor.length; i++) {
       if (actor[i].isExist)
-	((LuminousActor) actor[i]).drawLuminous();
+	(cast(LuminousActor) actor[i]).drawLuminous();
     }
   }
 }

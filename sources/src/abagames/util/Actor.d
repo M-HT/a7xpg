@@ -5,7 +5,7 @@
  */
 module abagames.util.Actor;
 
-import abagames.util.ActorInitializer;
+public import abagames.util.ActorInitializer;
 
 /**
  * Actor in the game that has the interface to move and draw.
@@ -13,7 +13,7 @@ import abagames.util.ActorInitializer;
 public class Actor {
  public:
   bool isExist;
-  
+
   public abstract Actor newActor();
   public abstract void init(ActorInitializer ini);
   public abstract void move();

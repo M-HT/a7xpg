@@ -5,11 +5,11 @@
  */
 module abagames.a7xpg.Gold;
 
-import math;
+import std.math;
 import opengl;
 import abagames.util.Vector;
 import abagames.util.Rand;
-import abagames.util.ActorInitializer;
+import abagames.util.Actor;
 import abagames.a7xpg.LuminousActor;
 import abagames.a7xpg.Ship;
 import abagames.a7xpg.Field;
@@ -37,14 +37,14 @@ public class Gold: LuminousActor {
   }
 
   public override void init(ActorInitializer ini) {
-    GoldInitializer gi = (GoldInitializer) ini;
+    GoldInitializer gi = cast(GoldInitializer) ini;
     ship = gi.ship;
     field = gi.field;
     rand = gi.rand;
     manager = gi.manager;
     pos = new Vector;
   }
-  
+
   public void set() {
     for (int i = 0; i < 8 ; i++) {
       pos.x = rand.nextFloat((field.size.x - SIZE) * 2) - field.size.x + SIZE;
@@ -66,7 +66,7 @@ public class Gold: LuminousActor {
     	ship.checkHit(pos.x - SIZE, pos.y, pos.x + SIZE, pos.y)) {
       isExist = false;
       for (int i = 0; i < 16; i++) {
-	manager.addParticle(pos, rand.nextFloat(math.PI * 2), 0.5, 0,5, 0.8, 0);
+	manager.addParticle(pos, rand.nextFloat(std.math.PI * 2), 0.5, 0,5, 0.8, 0);
       }
       manager.getGold();
     }

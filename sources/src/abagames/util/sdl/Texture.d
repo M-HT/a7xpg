@@ -5,7 +5,7 @@
  */
 module abagames.util.sdl.Texture;
 
-import string;
+import std.string;
 import opengl;
 import SDL;
 import abagames.util.sdl.SDLInitFailedException;
@@ -15,15 +15,15 @@ import abagames.util.sdl.SDLInitFailedException;
  */
 public class Texture {
  public:
-  static char[] imagesDir = "images/";
+  static string imagesDir = "images/";
 
  private:
   GLuint num;
 
-  public this(char[] name) {
-    char[] fileName = imagesDir ~ name;
-    SDL_Surface *surface;    
-    surface = SDL_LoadBMP(string.toStringz(fileName));
+  public this(const char[] name) {
+    const char[] fileName = imagesDir ~ name;
+    SDL_Surface *surface;
+    surface = SDL_LoadBMP(toStringz(fileName));
     if (!surface) {
       throw new SDLInitFailedException("Unable to load: " ~ fileName);
     }
@@ -33,7 +33,7 @@ public class Texture {
 		 GL_RGB, GL_UNSIGNED_BYTE, surface.pixels);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-    /*gluBuild2DMipmaps(GL_TEXTURE_2D, 3, surface.w, surface.h, 
+    /*gluBuild2DMipmaps(GL_TEXTURE_2D, 3, surface.w, surface.h,
       GL_RGB, GL_UNSIGNED_BYTE, surface.pixels);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_NEAREST);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);*/

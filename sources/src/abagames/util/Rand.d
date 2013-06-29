@@ -5,28 +5,27 @@
  */
 module abagames.util.Rand;
 
-import random;
-import date;
+import std.random;
 
 /**
  * Random number generator.
  */
 public class Rand {
-  
+  private Random rnd;
+
   public this() {
-    d_time timer = getUTCtime();
-    rand_seed(timer, 0);   
+    rnd = Random(unpredictableSeed);
   }
 
   public int nextInt(int n) {
-    return random.rand() % n;
+    return uniform(0, n, rnd);
   }
 
   public int nextSignedInt(int n) {
-    return random.rand() % (n * 2) - n;
+    return uniform(-n, n, rnd);
   }
 
   public float nextFloat(float n) {
-    return ((float)(random.rand() % (n * 10000))) / 10000;
+    return (cast(float)uniform(0, n * 10000, rnd)) / 10000;
   }
 }

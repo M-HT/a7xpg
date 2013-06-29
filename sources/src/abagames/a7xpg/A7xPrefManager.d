@@ -5,7 +5,7 @@
  */
 module abagames.a7xpg.A7xPrefManager;
 
-import stream;
+import std.stdio;
 import abagames.util.PrefManager;
 
 /**
@@ -14,34 +14,38 @@ import abagames.util.PrefManager;
 public class A7xPrefManager: PrefManager {
  public:
   static const int VERSION_NUM = 10;
-  static const char[] PREF_FILE = "a7xpg.prf";
+  static string PREF_FILE = "a7xpg.prf";
   int hiScore;
 
   private void init() {
     hiScore = 0;
   }
 
-  public void load() {
-    auto File fd = new File;
+  public override void load() {
+    scope File fd;
     try {
-      int ver;
+      int read_data[1];
       fd.open(PREF_FILE);
-      fd.read(ver);
-      if (ver != VERSION_NUM)
-	throw new Error("Wrong version num");
-      fd.read(hiScore);
-    } catch (Error e) {
+      fd.rawRead(read_data);
+      if (read_data[0] != VERSION_NUM)
+	throw new Exception("Wrong version num");
+      fd.rawRead(read_data);
+      hiScore = read_data[0];
+    } catch (Exception e) {
       init();
     } finally {
       fd.close();
     }
   }
 
-  public void save() {
-    auto File fd = new File;
-    fd.create(PREF_FILE);
-    fd.write(VERSION_NUM);
-    fd.write(hiScore);
-    fd.close();
+  public override void save() {
+    scope File fd;
+    try {
+      fd.open(PREF_FILE, "wb");
+      const int write_data[2] = [VERSION_NUM, hiScore];
+      fd.rawWrite(write_data);
+    } finally {
+      fd.close();
+    }
   }
 }

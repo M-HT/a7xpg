@@ -5,8 +5,8 @@
  */
 module abagames.util.sdl.MainLoop;
 
-import string;
-import c.stdlib;
+import std.string;
+import std.c.stdlib;
 import SDL;
 import abagames.util.Logger;
 import abagames.util.Rand;
@@ -71,7 +71,7 @@ public class MainLoop {
     int i;
     long nowTick;
     int frame;
-    
+
     try {
       screen.initSDL();
     } catch (SDLInitFailedException e) {
@@ -88,10 +88,10 @@ public class MainLoop {
 	done = 1;
 
       nowTick = SDL_GetTicks();
-      frame = (int) (nowTick-prvTickCount) / interval;
+      frame = cast(int) (nowTick-prvTickCount) / interval;
       if (frame <= 0) {
 	frame = 1;
-	SDL_Delay(prvTickCount+interval-nowTick);
+	SDL_Delay(cast(Uint32)(prvTickCount+interval-nowTick));
 	if (accframe) {
 	  prvTickCount = SDL_GetTicks();
 	} else {
