@@ -40,6 +40,7 @@ public class A7xGameManager: GameManager {
   Rand rand;
   Field field;
   Ship ship;
+  ParticleDrawData particleData;
   LuminousActorPool golds;
   LuminousActorPool enemies;
   LuminousActorPool particles;
@@ -122,24 +123,25 @@ public class A7xGameManager: GameManager {
     rand = new Rand;
     field = new Field;
     field.init();
-    Ship.createDisplayLists();
+    Ship.prepareColors();
     ship = new Ship;
     ship.init(input, field, this);
-    Gold.createDisplayLists();
+    Gold.prepareColors();
     scope Gold goldClass = new Gold;
     scope GoldInitializer gi = new GoldInitializer(ship, field, rand, this);
     golds = new LuminousActorPool(16, goldClass, gi);
-    Enemy.createDisplayLists();
+    Enemy.prepareColors();
     scope Enemy enemyClass = new Enemy;
     scope EnemyInitializer ei = new EnemyInitializer(ship, field, rand, this);
     enemies = new LuminousActorPool(ENEMY_MAX, enemyClass, ei);
+    particleData = new ParticleDrawData;
     scope Particle particleClass = new Particle;
-    scope ParticleInitializer pi = new ParticleInitializer(field, rand);
+    scope ParticleInitializer pi = new ParticleInitializer(field, rand, particleData);
     particles = new LuminousActorPool(256, particleClass, pi);
     scope Bonus bonusClass = new Bonus;
     scope BonusInitializer bi = new BonusInitializer();
     bonuses = new ActorPool(8, bonusClass, bi);
-    LetterRender.createDisplayLists();
+    LetterRender.prepareLetters();
     for (int i = 0; i < bgm.length; i++)
       bgm[i] = new Sound;
     bgm[0].loadSound("bgm1.ogg");
@@ -173,10 +175,6 @@ public class A7xGameManager: GameManager {
       bgm[i].free();
     for (int i = 0; i < se.length; i++)
       se[i].free();
-    LetterRender.deleteDisplayLists();
-    Enemy.deleteDisplayLists();
-    Gold.deleteDisplayLists();
-    Ship.deleteDisplayLists();
   }
 
   public void playSe(int n) {
@@ -547,9 +545,9 @@ public class A7xGameManager: GameManager {
     bonuses.draw();
     field.draw();
     golds.draw();
-    glBegin(GL_LINES);
+    particleData.clearData();
     particles.draw();
-    glEnd();
+    particleData.draw();
     ship.draw();
     enemies.draw();
   }
@@ -557,23 +555,23 @@ public class A7xGameManager: GameManager {
   private void stageClearDraw() {
     if (cnt < 32)
       field.draw();
-    glBegin(GL_LINES);
+    particleData.clearData();
     particles.draw();
-    glEnd();
+    particleData.draw();
   }
 
   private void titleDraw() {
-    glBegin(GL_LINES);
+    particleData.clearData();
     particles.draw();
-    glEnd();
+    particleData.draw();
     enemies.draw();
   }
 
   private void gameoverDraw() {
     field.draw();
-    glBegin(GL_LINES);
+    particleData.clearData();
     particles.draw();
-    glEnd();
+    particleData.draw();
     enemies.draw();
   }
 
@@ -581,9 +579,9 @@ public class A7xGameManager: GameManager {
     field.drawLuminous();
     golds.drawLuminous();
     glLineWidth(2);
-    glBegin(GL_LINES);
+    particleData.clearData();
     particles.drawLuminous();
-    glEnd();
+    particleData.draw();
     glLineWidth(1);
     ship.drawLuminous();
     enemies.drawLuminous();
@@ -592,24 +590,24 @@ public class A7xGameManager: GameManager {
   private void stageClearDrawLuminous() {
     if (cnt < 32)
       field.drawLuminous();
-    glBegin(GL_LINES);
+    particleData.clearData();
     particles.drawLuminous();
-    glEnd();
+    particleData.draw();
   }
 
   private void titleDrawLuminous() {
     field.drawLuminous();
-    glBegin(GL_LINES);
+    particleData.clearData();
     particles.drawLuminous();
-    glEnd();
+    particleData.draw();
     enemies.drawLuminous();
   }
 
   private void gameoverDrawLuminous() {
     field.drawLuminous();
-    glBegin(GL_LINES);
+    particleData.clearData();
     particles.drawLuminous();
-    glEnd();
+    particleData.draw();
     enemies.drawLuminous();
   }
 
@@ -637,8 +635,8 @@ public class A7xGameManager: GameManager {
     glPushMatrix();
     glTranslatef(30, 460, 0);
     glScalef(11, -11, 1);
-    glCallList(Ship.displayListIdx);
-    glCallList(Ship.displayListIdx + 1);
+    Ship.drawShip();
+    Ship.drawShipLine();
     glPopMatrix();
     if (state == IN_GAME) {
       ship.drawGauge();
@@ -646,8 +644,8 @@ public class A7xGameManager: GameManager {
       glPushMatrix();
       glTranslatef(30, 430, 0);
       glScalef(11, -11, 1);
-      glCallList(Gold.displayListIdx);
-      glCallList(Gold.displayListIdx + 1);
+      Gold.drawGold();
+      Gold.drawGoldLine();
       glPopMatrix();
     }
   }
@@ -672,16 +670,31 @@ public class A7xGameManager: GameManager {
     glEnable(GL_TEXTURE_2D);
     titleTexture.bind();
     A7xScreen.setColor(1, 1, 1, 1);
-    glBegin(GL_TRIANGLE_FAN);
-    glTexCoord2f(0, 0);
-    glVertex3f(80, 50, 0);
-    glTexCoord2f(1, 0);
-    glVertex3f(180, 50, 0);
-    glTexCoord2f(1, 1);
-    glVertex3f(180, 150, 0);
-    glTexCoord2f(0, 1);
-    glVertex3f(80, 150, 0);
-    glEnd();
+    {
+      static const int titleNumVertices = 4;
+      static const GLfloat[3*titleNumVertices] titleVertices = [
+         80,  50,   0,
+        180,  50,   0,
+        180, 150,   0,
+         80, 150,   0
+      ];
+      static const GLfloat[2*titleNumVertices] titleTexCoords = [
+        0, 0,
+        1, 0,
+        1, 1,
+        0, 1
+      ];
+
+      glEnableClientState(GL_VERTEX_ARRAY);
+      glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+
+      glVertexPointer(3, GL_FLOAT, 0, cast(void *)(titleVertices.ptr));
+      glTexCoordPointer(2, GL_FLOAT, 0, cast(void *)(titleTexCoords.ptr));
+      glDrawArrays(GL_TRIANGLE_FAN, 0, titleNumVertices);
+
+      glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+      glDisableClientState(GL_VERTEX_ARRAY);
+    }
     glDisable(GL_TEXTURE_2D);
   }
 

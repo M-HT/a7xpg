@@ -17,11 +17,41 @@ import abagames.a7xpg.A7xScreen;
 /**
  * Particles.
  */
+public class ParticleDrawData {
+ public:
+  GLfloat[] vertices;
+  GLfloat[] colors;
+
+  public void clearData()
+  {
+    vertices = [];
+    colors = [];
+  }
+
+  public void draw()
+  {
+    const int numVertices = cast(int)(colors.length / 4);
+
+    if (numVertices > 0) {
+      glEnableClientState(GL_VERTEX_ARRAY);
+      glEnableClientState(GL_COLOR_ARRAY);
+
+      glVertexPointer(3, GL_FLOAT, 0, cast(void *)(vertices.ptr));
+      glColorPointer(4, GL_FLOAT, 0, cast(void *)(colors.ptr));
+      glDrawArrays(GL_LINES, 0, numVertices);
+
+      glDisableClientState(GL_COLOR_ARRAY);
+      glDisableClientState(GL_VERTEX_ARRAY);
+    }
+  }
+}
+
 public class Particle: LuminousActor {
  private:
   static const float GRAVITY = 0.2;
   Field field;
   Rand rand;
+  ParticleDrawData drawData;
   Vector pos, ppos;
   Vector vel;
   float z, mz, pz;
@@ -37,6 +67,7 @@ public class Particle: LuminousActor {
     ParticleInitializer pi = cast(ParticleInitializer) ini;
     field = pi.field;
     rand = pi.rand;
+    drawData = pi.drawData;
     pos = new Vector;
     ppos = new Vector;
     vel = new Vector;
@@ -84,29 +115,44 @@ public class Particle: LuminousActor {
   }
 
   public override void draw() {
-    A7xScreen.setColor(r, g, b, 1);
-    glVertex3f(ppos.x, ppos.y, pz);
-    glVertex3f(pos.x, pos.y, z);
-    A7xScreen.setColor(r, g, b, 0.7);
-    glVertex3f(ppos.x, ppos.y, -pz);
-    glVertex3f(pos.x, pos.y, -z);
+    drawData.vertices ~= [
+      ppos.x, ppos.y,  pz,
+      pos.x , pos.y ,  z,
+      ppos.x, ppos.y, -pz,
+      pos.x , pos.y , -z
+    ];
+    drawData.colors ~= [
+      r * A7xScreen.brightness, g * A7xScreen.brightness, b * A7xScreen.brightness, 1  ,
+      r * A7xScreen.brightness, g * A7xScreen.brightness, b * A7xScreen.brightness, 1  ,
+      r * A7xScreen.brightness, g * A7xScreen.brightness, b * A7xScreen.brightness, 0.7,
+      r * A7xScreen.brightness, g * A7xScreen.brightness, b * A7xScreen.brightness, 0.7
+    ];
   }
 
   public override void drawLuminous() {
     if (lumAlp < 0.2) return;
-    A7xScreen.setColor(r, g, b, lumAlp);
-    glVertex3f(ppos.x, ppos.y, pz);
-    glVertex3f(pos.x, pos.y, z);
+
+    drawData.vertices ~= [
+      ppos.x, ppos.y, pz,
+      pos.x , pos.y , z
+    ];
+    drawData.colors ~= [
+      r * A7xScreen.brightness, g * A7xScreen.brightness, b * A7xScreen.brightness, lumAlp,
+      r * A7xScreen.brightness, g * A7xScreen.brightness, b * A7xScreen.brightness, lumAlp
+    ];
   }
+
 }
 
 public class ParticleInitializer: ActorInitializer {
  public:
   Field field;
   Rand rand;
+  ParticleDrawData drawData;
 
-  public this(Field field, Rand rand) {
+  public this(Field field, Rand rand, ParticleDrawData drawData) {
     this.field = field;
     this.rand = rand;
+    this.drawData = drawData;
   }
 }

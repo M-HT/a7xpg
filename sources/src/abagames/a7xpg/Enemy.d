@@ -21,7 +21,6 @@ import abagames.a7xpg.A7xScreen;
  */
 public class Enemy: LuminousActor {
  private:
-  static int displayListIdx;
   Ship ship;
   Field field;
   Rand rand;
@@ -43,6 +42,208 @@ public class Enemy: LuminousActor {
   int posHstIdx;
   const int APPEAR_CNT = 60;
   const int DESTROYED_CNT = 120;
+  static const GLenum[6] enemyDrawMode = [
+    GL_TRIANGLE_FAN,
+    GL_TRIANGLE_FAN,
+    GL_TRIANGLE_STRIP,
+    GL_TRIANGLE_STRIP,
+    GL_TRIANGLE_FAN,
+    GL_TRIANGLE_FAN
+  ];
+  static const GLfloat[][][6] enemyVertices = [
+    [ // type 0
+     [ 0.8,  1  , 0.2,
+       1  , -1  , 0  ,
+       0.7, -0.8, 0.8,
+       0  ,  1  , 0.2
+     ],
+     [-0.8,  1  , 0.2,
+      -1  , -1  , 0  ,
+      -0.7, -0.8, 0.8,
+       0  ,  1  , 0.2
+     ]
+    ],
+    [ // type 1
+     [ 0  ,  1  , 0.5,
+      -0.5, -1  , 0.2,
+      -0.8, -0.6, 0.6,
+       0  , -0.3, 1  ,
+       0.8, -0.6, 0.6,
+       0.5, -1  , 0.2
+     ]
+    ],
+    [ // type 2
+     [-0.3, -0.6, 1  ,
+       0  ,  0.6, 0.7,
+      -0.9,  0.8, 0.4,
+      -0.2,  0  , 0
+     ],
+     [ 0.3, -0.6, 1  ,
+       0  ,  0.6, 0.7,
+       0.9,  0.8, 0.4,
+       0.2,  0  , 0
+     ]
+    ],
+    [ // type 3
+     [ 0  ,  1  , 0.7,
+       0.8,  0.4, 0.7,
+       0.6,  0.3, 0  ,
+       0.8, -0.4, 0.7
+     ],
+     [ 0.8, -0.4, 0.7,
+       0  , -1  , 0.7,
+       0  , -0.7, 0  ,
+      -0.8, -0.4, 0.7
+     ],
+     [-0.8, -0.4, 0.7,
+      -0.8,  0.4, 0.7,
+      -0.6,  0.3, 0  ,
+       0  ,  1  , 0.7
+     ]
+    ],
+    [ // type 4
+     [ 0  ,  0  , 1  ,
+       1  ,  0  , 0.2,
+       0  ,  1  , 0.2,
+      -1  ,  0  , 0.2,
+       0  , -1  , 0.2,
+       1  ,  0  , 0.2
+     ]
+    ],
+    [ // type 5
+     [ 0  ,  0.5, 1  ,
+      -0.3,  1  , 0.3,
+       0.3,  1  , 0.3,
+       0.5, -1  , 0.4,
+      -0.5, -1  , 0.4,
+      -0.3,  1  , 0.3
+     ]
+    ]
+  ];
+  static GLfloat[][2][6] enemyColors = [
+    [ // type 0
+     [0.9, 0.7, 0.4, 0.9,
+      1  , 0.2, 0.4, 0.9,
+      1  , 0.2, 0.4, 0.9,
+      1  , 0.2, 0.4, 0.9
+     ]
+    ],
+    [ // type 1
+     [0.7, 0.3, 0.6, 1.0,
+      0.5, 0.2, 0.7, 0.8,
+      0.5, 0.2, 0.7, 0.8,
+      0.5, 0.2, 0.7, 0.8,
+      0.5, 0.2, 0.7, 0.8,
+      0.5, 0.2, 0.7, 0.8
+     ]
+    ],
+    [ // type 2
+     [0.6, 0.8, 0.2, 1.0,
+      0.5, 0.8, 0.2, 0.5,
+      0.5, 0.8, 0.2, 0.5,
+      0.6, 0.8, 0.5, 1.0
+     ]
+    ],
+    [ // type 3
+     [0.8, 0.2, 0.4, 0.9,
+      0.8, 0.2, 0.4, 0.9,
+      0.8, 0.1, 0.6, 0.6,
+      0.8, 0.2, 0.4, 0.9
+     ]
+    ],
+    [ // type 4
+     [0.5, 0.7, 0.3, 0.9,
+      0.5, 0.9, 0.3, 0.5,
+      0.5, 0.9, 0.3, 0.5,
+      0.5, 0.9, 0.3, 0.5,
+      0.5, 0.9, 0.3, 0.5,
+      0.5, 0.9, 0.3, 0.5
+     ]
+    ],
+    [ // type 5
+     [0.6, 0.3, 0.8, 0.9,
+      0.4, 0.3, 0.9, 0.6,
+      0.4, 0.3, 0.9, 0.6,
+      0.4, 0.3, 0.9, 0.6,
+      0.4, 0.3, 0.9, 0.6,
+      0.4, 0.3, 0.9, 0.6
+     ]
+    ]
+  ];
+  static const GLfloat[][6] enemyLineVertices = [
+    [ 0.7, -0.8,  0.8,
+      0.8,  1  ,  0.2,
+     -0.8,  1  ,  0.2,
+     -0.7, -0.8,  0.8
+    ],
+    [-0.5, -1  ,  0.2,
+     -0.8, -0.6,  0.6,
+      0  , -0.3,  1  ,
+      0.8, -0.6,  0.6,
+      0.5, -1  ,  0.2
+    ],
+    [-0.9,  0.8,  0.4,
+      0  ,  0.6,  0.7,
+      0.9,  0.8,  0.4
+    ],
+    [ 0  ,  1  ,  0.7,
+      0.6,  0.3,  0  ,
+      0.8, -0.4,  0.7,
+      0  , -0.7,  0  ,
+     -0.8, -0.4,  0.7,
+     -0.6,  0.3,  0  ,
+      0  ,  1  ,  0.7
+    ],
+    [ 1  ,  0  ,  0.2,
+      0  ,  1  ,  0.2,
+     -1  ,  0  ,  0.2,
+      0  , -1  ,  0.2,
+      1  ,  0  ,  0.2
+    ],
+    [-0.3,  1  ,  0.3,
+      0.3,  1  ,  0.3,
+      0.5, -1  ,  0.4,
+     -0.5, -1  ,  0.4,
+     -0.3,  1  ,  0.3
+    ]
+  ];
+  static GLfloat[][6] enemyLineColors = [
+    [0.9, 0.2, 0.2, 1,
+     0.9, 0.2, 0.2, 1,
+     0.9, 0.2, 0.2, 1,
+     0.9, 0.2, 0.2, 1
+    ],
+    [0.4, 0.2, 0.7, 1,
+     0.4, 0.2, 0.7, 1,
+     0.4, 0.2, 0.7, 1,
+     0.4, 0.2, 0.7, 1,
+     0.4, 0.2, 0.7, 1
+    ],
+    [0.5, 1  , 0.2, 1,
+     0.5, 1  , 0.2, 1,
+     0.5, 1  , 0.2, 1
+    ],
+    [0.8, 0.2, 0.6, 0.9,
+     0.8, 0.2, 0.6, 0.9,
+     0.8, 0.2, 0.6, 0.9,
+     0.8, 0.2, 0.6, 0.9,
+     0.8, 0.2, 0.6, 0.9,
+     0.8, 0.2, 0.6, 0.9,
+     0.8, 0.2, 0.6, 0.9
+    ],
+    [0.3, 0.8, 0.3, 0.9,
+     0.3, 0.8, 0.3, 0.9,
+     0.3, 0.8, 0.3, 0.9,
+     0.3, 0.8, 0.3, 0.9,
+     0.3, 0.8, 0.3, 0.9
+    ],
+    [0.4, 0.3, 0.9, 0.9,
+     0.4, 0.3, 0.9, 0.9,
+     0.4, 0.3, 0.9, 0.9,
+     0.4, 0.3, 0.9, 0.9,
+     0.4, 0.3, 0.9, 0.9
+    ]
+  ];
 
   public override Actor newActor() {
     return new Enemy;
@@ -527,11 +728,11 @@ public class Enemy: LuminousActor {
     glTranslatef(pos.x, pos.y, 0.5);
     glRotatef(-deg * 180 / std.math.PI, 0, 0, 1);
     glScalef(sz, sz, sz);
-    glCallList(displayListIdx + type * 3);
-    glCallList(displayListIdx + type * 3 + 1);
+    drawEnemy(type, 0); //glCallList(displayListIdx + type * 3);
+    drawEnemyLine(type); //glCallList(displayListIdx + type * 3 + 1);
     glTranslatef(0, 0, -0.5);
     glScalef(1, 1, -1);
-    glCallList(displayListIdx + type * 3 + 2);
+    drawEnemy(type, 1); //glCallList(displayListIdx + type * 3 + 2);
     glPopMatrix();
   }
 
@@ -540,11 +741,11 @@ public class Enemy: LuminousActor {
       return;
     glPushMatrix();
     glTranslatef(pos.x, pos.y, 0.5);
-    glCallList(displayListIdx + type * 3);
-    glCallList(displayListIdx + type * 3 + 1);
+    drawEnemy(type, 0); //glCallList(displayListIdx + type * 3);
+    drawEnemyLine(type); //glCallList(displayListIdx + type * 3 + 1);
     glTranslatef(0, 0, -0.5);
     glScalef(1, 1, -1);
-    glCallList(displayListIdx + type * 3 + 2);
+    drawEnemy(type, 1); //glCallList(displayListIdx + type * 3 + 2);
     glPopMatrix();
   }
 
@@ -559,26 +760,48 @@ public class Enemy: LuminousActor {
     glPushMatrix();
     glTranslatef(pos.x, pos.y, 0.5);
     glRotatef(-armDeg * 180 / std.math.PI, 0, 0, 1);
-    glBegin(GL_TRIANGLE_FAN);
-    A7xScreen.setColor(0.7, 0.9, 0.3, 0.3);
-    glVertex3f(0, 0, 0.5);
-    A7xScreen.setColor(0.7, 0.9, 0.3, 0.9);
-    glVertex3f(-0.5, 0, 0.5);
-    glVertex3f(0, sz, 0.5);
-    glVertex3f(0.5, 0, 0.5);
-    glVertex3f(0, -sz, 0.5);
-    glEnd();
+
+
+    const int armNumVertices = 5;
+    const GLfloat[3*armNumVertices] armVertices = [
+       0  ,  0 , 0.5,
+      -0.5,  0 , 0.5,
+       0  ,  sz, 0.5,
+       0.5,  0 , 0.5,
+       0  , -sz, 0.5
+    ];
+    GLfloat armColors[4*armNumVertices];
+
+    foreach (i; 0..armNumVertices) {
+      armColors[i*4 + 0] = 0.7 * A7xScreen.brightness;
+      armColors[i*4 + 1] = 0.9 * A7xScreen.brightness;
+      armColors[i*4 + 2] = 0.3 * A7xScreen.brightness;
+      if (i == 0)
+        armColors[i*4 + 3] = 0.3;
+      else
+        armColors[i*4 + 3] = 0.9;
+    }
+
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glEnableClientState(GL_COLOR_ARRAY);
+
+    glVertexPointer(3, GL_FLOAT, 0, cast(void *)(armVertices.ptr));
+    glColorPointer(4, GL_FLOAT, 0, cast(void *)(armColors.ptr));
+    glDrawArrays(GL_TRIANGLE_FAN, 0, armNumVertices);
+
     glTranslatef(0, 0, -0.5);
     glScalef(1, 1, -1);
-    glBegin(GL_TRIANGLE_FAN);
-    A7xScreen.setColor(0.7, 0.9, 0.3, 0.1);
-    glVertex3f(0, 0, 0.5);
-    A7xScreen.setColor(0.7, 0.9, 0.3, 0.5);
-    glVertex3f(-0.5, 0, 0.5);
-    glVertex3f(0, sz, 0.5);
-    glVertex3f(0.5, 0, 0.5);
-    glVertex3f(0, -sz, 0.5);
-    glEnd();
+
+    armColors[3] = 0.1;
+    foreach (i; 1..armNumVertices) {
+      armColors[i*4 + 3] = 0.5;
+    }
+
+    glDrawArrays(GL_TRIANGLE_FAN, 0, armNumVertices);
+
+    glDisableClientState(GL_COLOR_ARRAY);
+    glDisableClientState(GL_VERTEX_ARRAY);
+
     glPopMatrix();
   }
 
@@ -596,11 +819,11 @@ public class Enemy: LuminousActor {
       glTranslatef(posHst[hi].x, posHst[hi].y, 0.5);
       glRotatef(-degHst[hi] * 180 / std.math.PI, 0, 0, 1);
       glScalef(sz, sz, sz);
-      glCallList(displayListIdx + 5 * 3);
-      glCallList(displayListIdx + 5 * 3 + 1);
+      drawEnemy(5, 0); //glCallList(displayListIdx + 5 * 3);
+      drawEnemyLine(5); //glCallList(displayListIdx + 5 * 3 + 1);
       glTranslatef(0, 0, -0.5);
       glScalef(1, 1, -1);
-      glCallList(displayListIdx + 5 * 3 + 2);
+      drawEnemy(5, 1); //glCallList(displayListIdx + 5 * 3 + 2);
       glPopMatrix();
       hi += size * 2 / speed;
       if (hi >= POSITION_HISTORY_LENGTH)
@@ -628,14 +851,14 @@ public class Enemy: LuminousActor {
     glTranslatef(pos.x, pos.y, 0.5);
     glRotatef(-deg * 180 / std.math.PI, 0, 0, 1);
     glScalef(size, size, size);
-    glCallList(displayListIdx + type * 3 + 1);
+    drawEnemyLine(type); //glCallList(displayListIdx + type * 3 + 1);
     glPopMatrix();
   }
 
   private void drawType4Luminous() {
     glPushMatrix();
     glTranslatef(pos.x, pos.y, 0.5);
-    glCallList(displayListIdx + type * 3 + 1);
+    drawEnemyLine(type); //glCallList(displayListIdx + type * 3 + 1);
     glPopMatrix();
   }
 
@@ -643,14 +866,24 @@ public class Enemy: LuminousActor {
     glPushMatrix();
     glTranslatef(pos.x, pos.y, 0.5);
     glRotatef(-armDeg * 180 / std.math.PI, 0, 0, 1);
-    glBegin(GL_LINE_STRIP);
+
+    const int armNumVertices = 5;
+    const GLfloat[3*armNumVertices] armVertices = [
+      -0.5,  0   , 0.5,
+       0  ,  size, 0.5,
+       0.5,  0   , 0.5,
+       0  , -size, 0.5
+      -0.5,  0   , 0.5,
+    ];
+
     A7xScreen.setColor(0.5, 0.9, 0.3, 0.9);
-    glVertex3f(-0.5, 0, 0.5);
-    glVertex3f(0, size, 0.5);
-    glVertex3f(0.5, 0, 0.5);
-    glVertex3f(0, -size, 0.5);
-    glVertex3f(-0.5, 0, 0.5);
-    glEnd();
+    glEnableClientState(GL_VERTEX_ARRAY);
+
+    glVertexPointer(3, GL_FLOAT, 0, cast(void *)(armVertices.ptr));
+    glDrawArrays(GL_LINE_STRIP, 0, armNumVertices);
+
+    glDisableClientState(GL_VERTEX_ARRAY);
+
     glPopMatrix();
   }
 
@@ -674,242 +907,53 @@ public class Enemy: LuminousActor {
     }
   }
 
-  // Create display lists.
+  public static void prepareColors() {
+    foreach (j; 0..6) {
+      foreach (i; 0..(enemyLineColors[j].length / 4)) {
+        enemyLineColors[j][i*4 + 0] *= A7xScreen.brightness;
+        enemyLineColors[j][i*4 + 1] *= A7xScreen.brightness;
+        enemyLineColors[j][i*4 + 2] *= A7xScreen.brightness;
+      }
 
-  public static void createDisplayLists() {
-    displayListIdx = glGenLists(18);
-    glNewList(displayListIdx, GL_COMPILE);
-    drawEnemyType0(1);
-    glEndList();
-    glNewList(displayListIdx + 1, GL_COMPILE);
-    drawEnemyType0Line(1);
-    glEndList();
-    glNewList(displayListIdx + 2, GL_COMPILE);
-    drawEnemyType0(0.6);
-    glEndList();
-    glNewList(displayListIdx + 3, GL_COMPILE);
-    drawEnemyType1(1);
-    glEndList();
-    glNewList(displayListIdx + 4, GL_COMPILE);
-    drawEnemyType1Line(1);
-    glEndList();
-    glNewList(displayListIdx + 5, GL_COMPILE);
-    drawEnemyType1(0.6);
-    glEndList();
-    glNewList(displayListIdx + 6, GL_COMPILE);
-    drawEnemyType2(1);
-    glEndList();
-    glNewList(displayListIdx + 7, GL_COMPILE);
-    drawEnemyType2Line(1);
-    glEndList();
-    glNewList(displayListIdx + 8, GL_COMPILE);
-    drawEnemyType2(0.6);
-    glEndList();
-    glNewList(displayListIdx + 9, GL_COMPILE);
-    drawEnemyType3(1);
-    glEndList();
-    glNewList(displayListIdx + 10, GL_COMPILE);
-    drawEnemyType3Line(1);
-    glEndList();
-    glNewList(displayListIdx + 11, GL_COMPILE);
-    drawEnemyType3(0.6);
-    glEndList();
-    glNewList(displayListIdx + 12, GL_COMPILE);
-    drawEnemyType4(1);
-    glEndList();
-    glNewList(displayListIdx + 13, GL_COMPILE);
-    drawEnemyType4Line(1);
-    glEndList();
-    glNewList(displayListIdx + 14, GL_COMPILE);
-    drawEnemyType4(0.6);
-    glEndList();
-    glNewList(displayListIdx + 15, GL_COMPILE);
-    drawEnemyType5(1);
-    glEndList();
-    glNewList(displayListIdx + 16, GL_COMPILE);
-    drawEnemyType5Line(1);
-    glEndList();
-    glNewList(displayListIdx + 17, GL_COMPILE);
-    drawEnemyType5(0.6);
-    glEndList();
+      foreach (i; 0..(enemyColors[j][0].length / 4)) {
+        enemyColors[j][0][i*4 + 0] *= A7xScreen.brightness;
+        enemyColors[j][0][i*4 + 1] *= A7xScreen.brightness;
+        enemyColors[j][0][i*4 + 2] *= A7xScreen.brightness;
+      }
+
+      enemyColors[j][1] = enemyColors[j][0].dup;
+
+      foreach (i; 0..(enemyColors[j][1].length / 4)) {
+        enemyColors[j][1][i*4 + 3] *= 0.6;
+      }
+    }
   }
 
-  public static void deleteDisplayLists() {
-    glDeleteLists(displayListIdx, 18);
+  private static void drawEnemy(int enemyType, int colorType) {
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glEnableClientState(GL_COLOR_ARRAY);
+
+    glColorPointer(4, GL_FLOAT, 0, cast(void *)(enemyColors[enemyType][colorType].ptr));
+
+    foreach (i; 0..enemyVertices[enemyType].length) {
+      glVertexPointer(3, GL_FLOAT, 0, cast(void *)(enemyVertices[enemyType][i].ptr));
+      glDrawArrays(enemyDrawMode[enemyType], 0, cast(int)(enemyColors[enemyType][colorType].length / 4));
+    }
+
+    glDisableClientState(GL_COLOR_ARRAY);
+    glDisableClientState(GL_VERTEX_ARRAY);
   }
 
-  private static void drawEnemyType0(float alpha) {
-    glBegin(GL_TRIANGLE_FAN);
-    A7xScreen.setColor(0.9, 0.7, 0.4, 0.9 * alpha);
-    glVertex3f(0.8, 1, 0.2);
-    A7xScreen.setColor(1, 0.2, 0.4, 0.9 * alpha);
-    glVertex3f(1, -1, 0);
-    glVertex3f(0.7, -0.8, 0.8);
-    glVertex3f(0, 1, 0.2);
-    glEnd();
-    glBegin(GL_TRIANGLE_FAN);
-    A7xScreen.setColor(0.9, 0.7, 0.4, 0.9 * alpha);
-    glVertex3f(-0.8, 1, 0.2);
-    A7xScreen.setColor(1, 0.2, 0.4, 0.9 * alpha);
-    glVertex3f(-1, -1, 0);
-    glVertex3f(-0.7, -0.8, 0.8);
-    glVertex3f(0, 1, 0.2);
-    glEnd();
-  }
+  private static void drawEnemyLine(int enemyType) {
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glEnableClientState(GL_COLOR_ARRAY);
 
-  private static void drawEnemyType0Line(float alpha) {
-    glBegin(GL_LINE_STRIP);
-    A7xScreen.setColor(0.9, 0.2, 0.2, 1 * alpha);
-    glVertex3f(0.7, -0.8, 0.8);
-    glVertex3f(0.8, 1, 0.2);
-    glVertex3f(-0.8, 1, 0.2);
-    glVertex3f(-0.7, -0.8, 0.8);
-    glEnd();
-  }
+    glVertexPointer(3, GL_FLOAT, 0, cast(void *)(enemyLineVertices[enemyType].ptr));
+    glColorPointer(4, GL_FLOAT, 0, cast(void *)(enemyLineColors[enemyType].ptr));
+    glDrawArrays(GL_LINE_STRIP, 0, cast(int)(enemyLineColors[enemyType].length / 4));
 
-  private static void drawEnemyType1(float alpha) {
-    glBegin(GL_TRIANGLE_FAN);
-    A7xScreen.setColor(0.7, 0.3, 0.6, 1.0 * alpha);
-    glVertex3f(0, 1, 0.5);
-    A7xScreen.setColor(0.5, 0.2, 0.7, 0.8 * alpha);
-    glVertex3f(-0.5, -1, 0.2);
-    glVertex3f(-0.8, -0.6, 0.6);
-    glVertex3f(0, -0.3, 1);
-    glVertex3f(0.8, -0.6, 0.6);
-    glVertex3f(0.5, -1, 0.2);
-    glEnd();
-  }
-
-  private static void drawEnemyType1Line(float alpha) {
-    glBegin(GL_LINE_STRIP);
-    A7xScreen.setColor(0.4, 0.2, 0.7, 1.0 * alpha);
-    glVertex3f(-0.5, -1, 0.2);
-    glVertex3f(-0.8, -0.6, 0.6);
-    glVertex3f(0, -0.3, 1);
-    glVertex3f(0.8, -0.6, 0.6);
-    glVertex3f(0.5, -1, 0.2);
-    glEnd();
-  }
-
-  private static void drawEnemyType2(float alpha) {
-    glBegin(GL_TRIANGLE_STRIP);
-    A7xScreen.setColor(0.6, 0.8, 0.2, 1.0 * alpha);
-    glVertex3f(-0.3, -0.6, 1);
-    A7xScreen.setColor(0.5, 0.8, 0.2, 0.5 * alpha);
-    glVertex3f(0, 0.6, 0.7);
-    glVertex3f(-0.9, 0.8, 0.4);
-    A7xScreen.setColor(0.6, 0.8, 0.5, 1.0 * alpha);
-    glVertex3f(-0.2, 0, 0);
-    glEnd();
-    glBegin(GL_TRIANGLE_STRIP);
-    A7xScreen.setColor(0.6, 0.8, 0.2, 1.0 * alpha);
-    glVertex3f(0.3, -0.6, 1);
-    A7xScreen.setColor(0.5, 0.8, 0.2, 0.5 * alpha);
-    glVertex3f(0, 0.6, 0.7);
-    glVertex3f(0.9, 0.8, 0.4);
-    A7xScreen.setColor(0.6, 0.8, 0.5, 1.0 * alpha);
-    glVertex3f(0.2, 0, 0);
-    glEnd();
-  }
-
-  private static void drawEnemyType2Line(float alpha) {
-    A7xScreen.setColor(0.5, 1, 0.2, 1.0 * alpha);
-    glBegin(GL_LINE_STRIP);
-    glVertex3f(-0.9, 0.8, 0.4);
-    glVertex3f(0, 0.6, 0.7);
-    glVertex3f(0.9, 0.8, 0.4);
-    glEnd();
-  }
-
-  private static void drawEnemyType3(float alpha) {
-    glBegin(GL_TRIANGLE_STRIP);
-    A7xScreen.setColor(0.8, 0.2, 0.4, 0.9 * alpha);
-    glVertex3f(0, 1, 0.7);
-    glVertex3f(0.8, 0.4, 0.7);
-    A7xScreen.setColor(0.8, 0.1, 0.6, 0.6 * alpha);
-    glVertex3f(0.6, 0.3, 0);
-    A7xScreen.setColor(0.8, 0.2, 0.4, 0.9 * alpha);
-    glVertex3f(0.8, -0.4, 0.7);
-    glEnd();
-    glBegin(GL_TRIANGLE_STRIP);
-    A7xScreen.setColor(0.8, 0.2, 0.4, 0.9 * alpha);
-    glVertex3f(0.8, -0.4, 0.7);
-    glVertex3f(0, -1, 0.7);
-    A7xScreen.setColor(0.8, 0.1, 0.6, 0.6 * alpha);
-    glVertex3f(0, -0.7, 0);
-    A7xScreen.setColor(0.8, 0.2, 0.4, 0.9 * alpha);
-    glVertex3f(-0.8, -0.4, 0.7);
-    glEnd();
-    glBegin(GL_TRIANGLE_STRIP);
-    A7xScreen.setColor(0.8, 0.2, 0.4, 0.9 * alpha);
-    glVertex3f(-0.8, -0.4, 0.7);
-    glVertex3f(-0.8, 0.4, 0.7);
-    A7xScreen.setColor(0.8, 0.1, 0.6, 0.6 * alpha);
-    glVertex3f(-0.6, 0.3, 0);
-    A7xScreen.setColor(0.8, 0.2, 0.4, 0.9 * alpha);
-    glVertex3f(0, 1, 0.7);
-    glEnd();
-  }
-
-  private static void drawEnemyType3Line(float alpha) {
-    A7xScreen.setColor(0.8, 0.2, 0.6, 0.9 * alpha);
-    glBegin(GL_LINE_STRIP);
-    glVertex3f(0, 1, 0.7);
-    glVertex3f(0.6, 0.3, 0);
-    glVertex3f(0.8, -0.4, 0.7);
-    glVertex3f(0, -0.7, 0);
-    glVertex3f(-0.8, -0.4, 0.7);
-    glVertex3f(-0.6, 0.3, 0);
-    glVertex3f(0, 1, 0.7);
-    glEnd();
-  }
-
-  private static void drawEnemyType4(float alpha) {
-    glBegin(GL_TRIANGLE_FAN);
-    A7xScreen.setColor(0.5, 0.7, 0.3, 0.9 * alpha);
-    glVertex3f(0, 0, 1);
-    A7xScreen.setColor(0.5, 0.9, 0.3, 0.5 * alpha);
-    glVertex3f(1, 0, 0.2);
-    glVertex3f(0, 1, 0.2);
-    glVertex3f(-1, 0, 0.2);
-    glVertex3f(0, -1, 0.2);
-    glVertex3f(1, 0, 0.2);
-    glEnd();
-  }
-
-  private static void drawEnemyType4Line(float alpha) {
-    A7xScreen.setColor(0.3, 0.8, 0.3, 0.9 * alpha);
-    glBegin(GL_LINE_STRIP);
-    glVertex3f(1, 0, 0.2);
-    glVertex3f(0, 1, 0.2);
-    glVertex3f(-1, 0, 0.2);
-    glVertex3f(0, -1, 0.2);
-    glVertex3f(1, 0, 0.2);
-    glEnd();
-  }
-
-  private static void drawEnemyType5(float alpha) {
-    glBegin(GL_TRIANGLE_FAN);
-    A7xScreen.setColor(0.6, 0.3, 0.8, 0.9 * alpha);
-    glVertex3f(0, 0.5, 1);
-    A7xScreen.setColor(0.4, 0.3, 0.9, 0.6 * alpha);
-    glVertex3f(-0.3, 1, 0.3);
-    glVertex3f(0.3, 1, 0.3);
-    glVertex3f(0.5, -1, 0.4);
-    glVertex3f(-0.5, -1, 0.4);
-    glVertex3f(-0.3, 1, 0.3);
-    glEnd();
-  }
-
-  private static void drawEnemyType5Line(float alpha) {
-    A7xScreen.setColor(0.4, 0.3, 0.9, 0.9 * alpha);
-    glBegin(GL_LINE_STRIP);
-    glVertex3f(-0.3, 1, 0.3);
-    glVertex3f(0.3, 1, 0.3);
-    glVertex3f(0.5, -1, 0.4);
-    glVertex3f(-0.5, -1, 0.4);
-    glVertex3f(-0.3, 1, 0.3);
-    glEnd();
+    glDisableClientState(GL_COLOR_ARRAY);
+    glDisableClientState(GL_VERTEX_ARRAY);
   }
 }
 

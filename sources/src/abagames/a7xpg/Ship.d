@@ -20,7 +20,6 @@ import abagames.a7xpg.A7xScreen;
 public class Ship {
  public:
   static const float SIZE = 1;
-  static int displayListIdx;
   Vector pos;
   bool invincible;
   bool restart;
@@ -48,6 +47,81 @@ public class Ship {
   const float GAUGE_MAX = 200;
   float gauge;
   int enemyDstCnt;
+  static const int shipNumVertices = 4 + 6;
+  static const int shipLineNumVertices = 3 + 3 + 3;
+  static const int shipFireLineNumVertices = 3 + 4;
+  static const GLfloat[3*shipNumVertices] shipVertices = [
+     0  ,  1  , 0  ,
+    -0.8, -1  , 0  ,
+     0  , -0.8, 0.6,
+     0.8, -1  , 0  ,
+
+    -0.8, -1  , 0  ,
+    -1.2,  0.2, 1  ,
+     0  , -0.9, 0.2,
+     0  , -0.9, 0.2,
+     1.2,  0.2, 1  ,
+     0.8, -1  , 0
+  ];
+  static GLfloat[4*shipNumVertices] shipColors = [
+    0.3, 1  , 0.2, 0.8,
+    0.2, 0.8, 0.2, 0.6,
+    0.2, 0.8, 0.2, 0.4,
+    0.2, 0.8, 0.2, 0.6,
+
+    0.2, 0.5, 0.8, 0.6,
+    0.2, 0.5, 0.8, 0.9,
+    0.2, 0.5, 0.8, 0.4,
+    0.2, 0.5, 0.8, 0.4,
+    0.2, 0.5, 0.8, 0.9,
+    0.2, 0.5, 0.8, 0.6
+  ];
+  static const GLfloat[3*shipLineNumVertices] shipLineVertices = [
+    -0.8, -1  ,  0  ,
+     0  ,  1  ,  0  ,
+     0.8, -1  ,  0  ,
+
+    -0.8, -1  ,  0  ,
+    -1.2,  0.2,  1  ,
+     0  , -0.9,  0.2,
+
+     0  , -0.9,  0.2,
+     1.2,  0.2,  1  ,
+     0.8, -1  ,  0
+  ];
+  static GLfloat[4*shipLineNumVertices] shipLineColors = [
+    0.3, 1  , 0.2, 1,
+    0.3, 1  , 0.2, 1,
+    0.3, 1  , 0.2, 1,
+
+    0.2, 0.6, 0.8, 1,
+    0.2, 0.6, 0.8, 1,
+    0.2, 0.6, 0.8, 1,
+
+    0.2, 0.6, 0.8, 1,
+    0.2, 0.6, 0.8, 1,
+    0.2, 0.6, 0.8, 1
+  ];
+  static const GLfloat[3*shipFireLineNumVertices] shipFireLineVertices = [
+    -0.8, -1  ,  0  ,
+     0  ,  1  ,  0  ,
+     0.8, -1  ,  0  ,
+
+    -0.8, -1  ,  0  ,
+     0  , -0.9,  0.2,
+     0  , -0.9,  0.2,
+     0.8, -1  ,  0
+  ];
+  static GLfloat[4*shipFireLineNumVertices] shipFireLineColors = [
+    1, 0, 0, 1,
+    1, 0, 0, 1,
+    1, 0, 0, 1,
+
+    1, 0, 0, 1,
+    1, 0, 0, 1,
+    1, 0, 0, 1,
+    1, 0, 0, 1
+  ];
 
   public void init(Input input, Field field, A7xGameManager manager) {
     this.input = input;
@@ -260,11 +334,11 @@ public class Ship {
     glPushMatrix();
     glTranslatef(pos.x, pos.y, 0.5);
     glRotatef(-deg * 180 / std.math.PI, 0, 0, 1);
-    glCallList(displayListIdx);
-    glCallList(displayListIdx + 1);
+    drawShip();
+    drawShipLine();
     glTranslatef(0, 0, -0.5);
     glScalef(1, 1, -1);
-    glCallList(displayListIdx);
+    drawShip();
     glPopMatrix();
   }
 
@@ -275,9 +349,9 @@ public class Ship {
     glTranslatef(pos.x, pos.y, 0.5);
     glRotatef(-deg * 180 / std.math.PI, 0, 0, 1);
     if (invincible)
-      glCallList(displayListIdx + 2);
+      drawShipFireLine();
     else
-      glCallList(displayListIdx + 1);
+      drawShipLine();
     glPopMatrix();
   }
 
@@ -358,84 +432,63 @@ public class Ship {
     v.y -= cos(wd) * 10 / d / ds;
   }
 
-  // Create display lists.
+  public static void prepareColors() {
+    foreach (i; 0..shipNumVertices) {
+      shipColors[i*4 + 0] *= A7xScreen.brightness;
+      shipColors[i*4 + 1] *= A7xScreen.brightness;
+      shipColors[i*4 + 2] *= A7xScreen.brightness;
+    }
 
-  public static void createDisplayLists() {
-    displayListIdx = glGenLists(3);
-    glNewList(displayListIdx, GL_COMPILE);
-    drawShip(1);
-    glEndList();
-    glNewList(displayListIdx + 1, GL_COMPILE);
-    drawShipLine(1);
-    glEndList();
-    glNewList(displayListIdx + 2, GL_COMPILE);
-    drawShipFireLine(1);
-    glEndList();
+    foreach (i; 0..shipLineNumVertices) {
+      shipLineColors[i*4 + 0] *= A7xScreen.brightness;
+      shipLineColors[i*4 + 1] *= A7xScreen.brightness;
+      shipLineColors[i*4 + 2] *= A7xScreen.brightness;
+    }
+
+    foreach (i; 0..shipFireLineNumVertices) {
+      shipFireLineColors[i*4 + 0] *= A7xScreen.brightness;
+      shipFireLineColors[i*4 + 1] *= A7xScreen.brightness;
+      shipFireLineColors[i*4 + 2] *= A7xScreen.brightness;
+    }
   }
 
-  public static void deleteDisplayLists() {
-    glDeleteLists(displayListIdx, 3);
+  public static void drawShip() {
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glEnableClientState(GL_COLOR_ARRAY);
+
+    glVertexPointer(3, GL_FLOAT, 0, cast(void *)(shipVertices.ptr));
+    glColorPointer(4, GL_FLOAT, 0, cast(void *)(shipColors.ptr));
+    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+    glDrawArrays(GL_TRIANGLES, 4, 6);
+
+    glDisableClientState(GL_COLOR_ARRAY);
+    glDisableClientState(GL_VERTEX_ARRAY);
   }
 
-  private static void drawShip(float alpha) {
-    glBegin(GL_TRIANGLE_FAN);
-    A7xScreen.setColor(0.3, 1, 0.2, 0.8 * alpha);
-    glVertex3f(0, 1, 0);
-    A7xScreen.setColor(0.2, 0.8, 0.2, 0.6 * alpha);
-    glVertex3f(-0.8, -1, 0);
-    A7xScreen.setColor(0.2, 0.8, 0.2, 0.4 * alpha);
-    glVertex3f(0, -0.8, 0.6);
-    A7xScreen.setColor(0.2, 0.8, 0.2, 0.6 * alpha);
-    glVertex3f(0.8, -1, 0);
-    glEnd();
-    glBegin(GL_TRIANGLES);
-    A7xScreen.setColor(0.2, 0.5, 0.8, 0.6 * alpha);
-    glVertex3f(-0.8, -1, 0);
-    A7xScreen.setColor(0.2, 0.5, 0.8, 0.9 * alpha);
-    glVertex3f(-1.2, 0.2, 1);
-    A7xScreen.setColor(0.2, 0.5, 0.8, 0.4 * alpha);
-    glVertex3f(0, -0.9, 0.2);
-    A7xScreen.setColor(0.2, 0.5, 0.8, 0.4 * alpha);
-    glVertex3f(0, -0.9, 0.2);
-    A7xScreen.setColor(0.2, 0.5, 0.8, 0.9 * alpha);
-    glVertex3f(1.2, 0.2, 1);
-    A7xScreen.setColor(0.2, 0.5, 0.8, 0.6 * alpha);
-    glVertex3f(0.8, -1, 0);
-    glEnd();
+  public static void drawShipLine() {
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glEnableClientState(GL_COLOR_ARRAY);
+
+    glVertexPointer(3, GL_FLOAT, 0, cast(void *)(shipLineVertices.ptr));
+    glColorPointer(4, GL_FLOAT, 0, cast(void *)(shipLineColors.ptr));
+    glDrawArrays(GL_LINE_STRIP, 0, 3);
+    glDrawArrays(GL_LINE_STRIP, 3, 3);
+    glDrawArrays(GL_LINE_STRIP, 6, 3);
+
+    glDisableClientState(GL_COLOR_ARRAY);
+    glDisableClientState(GL_VERTEX_ARRAY);
   }
 
-  private static void drawShipLine(float alpha) {
-    glBegin(GL_LINE_STRIP);
-    A7xScreen.setColor(0.3, 1, 0.2, 1 * alpha);
-    glVertex3f(-0.8, -1, 0);
-    glVertex3f(0, 1, 0);
-    glVertex3f(0.8, -1, 0);
-    glEnd();
-    A7xScreen.setColor(0.2, 0.6, 0.8, 1 * alpha);
-    glBegin(GL_LINE_STRIP);
-    glVertex3f(-0.8, -1, 0);
-    glVertex3f(-1.2, 0.2, 1);
-    glVertex3f(0, -0.9, 0.2);
-    glEnd();
-    glBegin(GL_LINE_STRIP);
-    glVertex3f(0, -0.9, 0.2);
-    glVertex3f(1.2, 0.2, 1);
-    glVertex3f(0.8, -1, 0);
-    glEnd();
-  }
+  private static void drawShipFireLine() {
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glEnableClientState(GL_COLOR_ARRAY);
 
-  private static void drawShipFireLine(float alpha) {
-    glBegin(GL_LINE_STRIP);
-    A7xScreen.setColor(1, 0, 0, 1 * alpha);
-    glVertex3f(-0.8, -1, 0);
-    glVertex3f(0, 1, 0);
-    glVertex3f(0.8, -1, 0);
-    glEnd();
-    glBegin(GL_LINES);
-    glVertex3f(-0.8, -1, 0);
-    glVertex3f(0, -0.9, 0.2);
-    glVertex3f(0, -0.9, 0.2);
-    glVertex3f(0.8, -1, 0);
-    glEnd();
+    glVertexPointer(3, GL_FLOAT, 0, cast(void *)(shipFireLineVertices.ptr));
+    glColorPointer(4, GL_FLOAT, 0, cast(void *)(shipFireLineColors.ptr));
+    glDrawArrays(GL_LINE_STRIP, 0, 3);
+    glDrawArrays(GL_LINES, 3, 4);
+
+    glDisableClientState(GL_COLOR_ARRAY);
+    glDisableClientState(GL_VERTEX_ARRAY);
   }
 }

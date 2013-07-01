@@ -50,7 +50,7 @@ public class A7xScreen: Screen3D {
     memset(data, 0, luminousTextureWidth * luminousTextureHeight * 4 * uint.sizeof);
     glGenTextures(1, &luminousTexture);
     glBindTexture(GL_TEXTURE_2D, luminousTexture);
-    glTexImage2D(GL_TEXTURE_2D, 0, 4, luminousTextureWidth, luminousTextureHeight, 0,
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, luminousTextureWidth, luminousTextureHeight, 0,
 		 GL_RGBA, GL_UNSIGNED_BYTE, data);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -102,43 +102,77 @@ public class A7xScreen: Screen3D {
     glBindTexture(GL_TEXTURE_2D, luminousTexture);
     viewOrtho();
     glColor4f(1, 0.8, 0.9, luminous);
-    glBegin(GL_QUADS);
-    for (int i = 0; i < 5; i++) {
-      glTexCoord2f(0, 1);
-      glVertex2f(0 + lmOfs[i][0] * lmOfsBs, 0 + lmOfs[i][1] * lmOfsBs);
-      glTexCoord2f(0, 0);
-      glVertex2f(0 + lmOfs[i][0] * lmOfsBs, height + lmOfs[i][1] * lmOfsBs);
-      glTexCoord2f(1, 0);
-      glVertex2f(width + lmOfs[i][0] * lmOfsBs, height + lmOfs[i][0] * lmOfsBs);
-      glTexCoord2f(1, 1);
-      glVertex2f(width + lmOfs[i][0] * lmOfsBs, 0 + lmOfs[i][0] * lmOfsBs);
+    {
+      static const GLfloat[2*4] luminousTexCoords = [
+        0, 1,
+        0, 0,
+        1, 0,
+        1, 1
+      ];
+      GLfloat[2*4] luminousVertices;
+
+      glEnableClientState(GL_VERTEX_ARRAY);
+      glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+
+      glVertexPointer(2, GL_FLOAT, 0, cast(void *)(luminousVertices.ptr));
+      glTexCoordPointer(2, GL_FLOAT, 0, cast(void *)(luminousTexCoords.ptr));
+
+      foreach (i; 0..5) {
+        luminousVertices[0] = 0 + lmOfs[i][0] * lmOfsBs;
+        luminousVertices[1] = 0 + lmOfs[i][1] * lmOfsBs;
+
+        luminousVertices[2] = 0 + lmOfs[i][0] * lmOfsBs;
+        luminousVertices[3] = height + lmOfs[i][1] * lmOfsBs;
+
+        luminousVertices[4] = width + lmOfs[i][0] * lmOfsBs;
+        luminousVertices[5] = height + lmOfs[i][0] * lmOfsBs;
+
+        luminousVertices[6] = width + lmOfs[i][0] * lmOfsBs;
+        luminousVertices[7] = 0 + lmOfs[i][0] * lmOfsBs;
+
+        glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+      }
+
+      glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+      glDisableClientState(GL_VERTEX_ARRAY);
     }
-    glEnd();
     viewPerspective();
     glDisable(GL_TEXTURE_2D);
   }
 
   public static void drawBoxSolid(float x, float y, float width, float height) {
+    const int numBoxVertices = 4;
+    GLfloat[3*numBoxVertices] boxVertices = [
+      0, 0, 0,
+      width, 0, 0,
+      width, height, 0,
+      0, height, 0
+    ];
+
     glPushMatrix();
     glTranslatef(x, y, 0);
-    glBegin(GL_TRIANGLE_FAN);
-    glVertex3f(0, 0, 0);
-    glVertex3f(width, 0, 0);
-    glVertex3f(width, height, 0);
-    glVertex3f(0, height, 0);
-    glEnd();
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glVertexPointer(3, GL_FLOAT, 0, cast(void *)(boxVertices.ptr));
+    glDrawArrays(GL_TRIANGLE_FAN, 0, numBoxVertices);
+    glDisableClientState(GL_VERTEX_ARRAY);
     glPopMatrix();
   }
 
   public static void drawBoxLine(float x, float y, float width, float height) {
+    const int numBoxVertices = 4;
+    GLfloat[3*numBoxVertices] boxVertices = [
+      0, 0, 0,
+      width, 0, 0,
+      width, height, 0,
+      0, height, 0
+    ];
+
     glPushMatrix();
     glTranslatef(x, y, 0);
-    glBegin(GL_LINE_LOOP);
-    glVertex3f(0, 0, 0);
-    glVertex3f(width, 0, 0);
-    glVertex3f(width, height, 0);
-    glVertex3f(0, height, 0);
-    glEnd();
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glVertexPointer(3, GL_FLOAT, 0, cast(void *)(boxVertices.ptr));
+    glDrawArrays(GL_LINE_LOOP, 0, numBoxVertices);
+    glDisableClientState(GL_VERTEX_ARRAY);
     glPopMatrix();
   }
 

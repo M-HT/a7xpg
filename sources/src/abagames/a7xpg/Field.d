@@ -61,50 +61,76 @@ public class Field {
   }
 
   public void draw() {
-    glBegin(GL_TRIANGLE_STRIP);
-    A7xScreen.setColor(r, g, b, 0.4);
-    glVertex3f(-size.x, -size.y, 0);
-    A7xScreen.setColor(r, g, b, 0.8);
-    glVertex3f(-size.x, -size.y, HEIGHT);
-    A7xScreen.setColor(r, g, b, 0.4);
-    glVertex3f(size.x, -size.y, 0);
-    A7xScreen.setColor(r, g, b, 0.8);
-    glVertex3f(size.x, -size.y, HEIGHT);
-    A7xScreen.setColor(r, g, b, 0.4);
-    glVertex3f(size.x, size.y, 0);
-    A7xScreen.setColor(r, g, b, 0.8);
-    glVertex3f(size.x, size.y, HEIGHT);
-    A7xScreen.setColor(r, g, b, 0.4);
-    glVertex3f(-size.x, size.y, 0);
-    A7xScreen.setColor(r, g, b, 0.8);
-    glVertex3f(-size.x, size.y, HEIGHT);
-    A7xScreen.setColor(r, g, b, 0.4);
-    glVertex3f(-size.x, -size.y, 0);
-    A7xScreen.setColor(r, g, b, 0.8);
-    glVertex3f(-size.x, -size.y, HEIGHT);
-    glEnd();
+    const int fieldNumVertices = 10;
+    GLfloat[3*fieldNumVertices] fieldVertices;
+    GLfloat[4*fieldNumVertices] fieldColors;
+
+    foreach (i; 0..fieldNumVertices) {
+      fieldColors[i*4 + 0] = r * A7xScreen.brightness;
+      fieldColors[i*4 + 1] = g * A7xScreen.brightness;
+      fieldColors[i*4 + 2] = b * A7xScreen.brightness;
+      if ((i % 2) == 0) {
+        fieldVertices[i*3 + 2] = 0;
+        fieldColors[i*4 + 3] = 0.4;
+      } else {
+        fieldVertices[i*3 + 2] = HEIGHT;
+        fieldColors[i*4 + 3] = 0.8;
+      }
+      if (i >= 2 && i <= 5)
+        fieldVertices[i*3 + 0] = size.x;
+      else
+        fieldVertices[i*3 + 0] = -size.x;
+      if (i >= 4 && i <= 7)
+        fieldVertices[i*3 + 1] = size.y;
+      else
+        fieldVertices[i*3 + 1] = -size.y;
+    }
+
+
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glEnableClientState(GL_COLOR_ARRAY);
+
+    glVertexPointer(3, GL_FLOAT, 0, cast(void *)(fieldVertices.ptr));
+    glColorPointer(4, GL_FLOAT, 0, cast(void *)(fieldColors.ptr));
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, fieldNumVertices);
+
+    glDisableClientState(GL_COLOR_ARRAY);
+    glDisableClientState(GL_VERTEX_ARRAY);
   }
 
   public void drawLuminous() {
-    A7xScreen.setColor(lr, lg, lb, 0.9 * alpha);
-    glBegin(GL_LINE_STRIP);
-    glVertex3f(-size.x, -size.y, HEIGHT);
-    glVertex3f(size.x, -size.y, HEIGHT);
-    glVertex3f(size.x, size.y, HEIGHT);
-    glVertex3f(-size.x, size.y, HEIGHT);
-    glVertex3f(-size.x, -size.y, HEIGHT);
-    glEnd();
-    float hz = HEIGHT_OFFSET - z;
-    for (int i = 0; i < 8; i++) {
-      A7xScreen.setColor(lr, lg, lb, (0.8 - i * 0.05) * alpha);
-      glBegin(GL_LINE_STRIP);
-      glVertex3f(-size.x, -size.y, hz);
-      glVertex3f(size.x, -size.y, hz);
-      glVertex3f(size.x, size.y, hz);
-      glVertex3f(-size.x, size.y, hz);
-      glVertex3f(-size.x, -size.y, hz);
-      glEnd();
-      hz -= HEIGHT_OFFSET;
+    const int fieldNumVertices = 5;
+    GLfloat[3*fieldNumVertices] fieldVertices;
+
+    foreach (i; 0..fieldNumVertices) {
+      fieldVertices[i*3 + 2] = HEIGHT;
+
+      if (i >= 1 && i <= 2)
+        fieldVertices[i*3 + 0] = size.x;
+      else
+        fieldVertices[i*3 + 0] = -size.x;
+      if (i >= 2 && i <= 3)
+        fieldVertices[i*3 + 1] = size.y;
+      else
+        fieldVertices[i*3 + 1] = -size.y;
     }
+
+    glEnableClientState(GL_VERTEX_ARRAY);
+
+    glVertexPointer(3, GL_FLOAT, 0, cast(void *)(fieldVertices.ptr));
+    A7xScreen.setColor(lr, lg, lb, 0.9 * alpha);
+    glDrawArrays(GL_LINE_STRIP, 0, fieldNumVertices);
+
+    float hz = HEIGHT_OFFSET - z;
+    foreach (j; 0..8) {
+        foreach (i; 0..fieldNumVertices) {
+          fieldVertices[i*3 + 2] = hz;
+        }
+        A7xScreen.setColor(lr, lg, lb, (0.8 - j * 0.05) * alpha);
+        glDrawArrays(GL_LINE_STRIP, 0, fieldNumVertices);
+        hz -= HEIGHT_OFFSET;
+    }
+
+    glDisableClientState(GL_VERTEX_ARRAY);
   }
 }

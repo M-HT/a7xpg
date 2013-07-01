@@ -12,14 +12,27 @@ import abagames.a7xpg.A7xScreen;
  * Letters renderer.
  */
 public class LetterRender {
- public:
-  static int displayListIdx;
+ private:
+  static const int boxNumVertices = 4;
+  static GLfloat[3*boxNumVertices][][42] letterVertices;
+  static GLfloat[4*boxNumVertices][2] boxColors = [
+    [1, 1, 1, 0.5,
+     1, 1, 1, 0.5,
+     1, 1, 1, 0.5,
+     1, 1, 1, 0.5
+    ],
+    [1, 1, 1, 1  ,
+     1, 1, 1, 1  ,
+     1, 1, 1, 1  ,
+     1, 1, 1, 1
+    ]
+  ];
 
   private static void drawLetter(int n, float x, float y, float s) {
     glPushMatrix();
     glTranslatef(x, y, 0);
     glScalef(s, s, s);
-    glCallList(displayListIdx + n);
+    drawLetter(n);
     glPopMatrix();
   }
 
@@ -27,7 +40,7 @@ public class LetterRender {
     glPushMatrix();
     glTranslatef(x, y, 0);
     glScalef(s, -s, s);
-    glCallList(displayListIdx + n);
+    drawLetter(n);
     glPopMatrix();
   }
 
@@ -111,14 +124,17 @@ public class LetterRender {
     }
   }
 
-  private static void drawBox(float x, float y, float width, float height) {
-    A7xScreen.setColor(1, 1, 1, 0.5);
-    A7xScreen.drawBoxSolid(x - width, y - height, width * 2, height * 2);
-    A7xScreen.setColor(1, 1, 1, 1);
-    A7xScreen.drawBoxLine(x - width, y - height, width * 2, height * 2);
+  private static void prepareBox(int idx, float x, float y, float width, float height) {
+    ++letterVertices[idx].length;
+    letterVertices[idx][letterVertices[idx].length - 1] = [
+      x - width, y - height, 0,
+      x + width, y - height, 0,
+      x + width, y + height, 0,
+      x - width, y + height, 0
+    ];
   }
 
-  private static void drawLetter(int idx) {
+  private static void prepareLetter(int idx) {
     int i;
     float x, y, length, size, t;
     int deg;
@@ -135,23 +151,41 @@ public class LetterRender {
       y = y;
       deg %= 180;
       if (deg <= 45 || deg > 135)
-	drawBox(x, y, size, length);
+	prepareBox(idx, x, y, size, length);
       else
-	drawBox(x, y, length, size);
+	prepareBox(idx, x, y, length, size);
     }
   }
 
-  public static void createDisplayLists() {
-    displayListIdx = glGenLists(42);
-    for (int i = 0; i < 42; i++) {
-      glNewList(displayListIdx + i, GL_COMPILE);
-      drawLetter(i);
-      glEndList();
+  private static void drawLetter(int idx) {
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glEnableClientState(GL_COLOR_ARRAY);
+
+    foreach (i; 0..letterVertices[idx].length) {
+      glVertexPointer(3, GL_FLOAT, 0, cast(void *)(letterVertices[idx][i].ptr));
+
+      glColorPointer(4, GL_FLOAT, 0, cast(void *)(boxColors[0].ptr));
+      glDrawArrays(GL_TRIANGLE_FAN, 0, boxNumVertices);
+      glColorPointer(4, GL_FLOAT, 0, cast(void *)(boxColors[1].ptr));
+      glDrawArrays(GL_LINE_LOOP, 0, boxNumVertices);
     }
+
+    glDisableClientState(GL_COLOR_ARRAY);
+    glDisableClientState(GL_VERTEX_ARRAY);
   }
 
-  public static void deleteDisplayLists() {
-    glDeleteLists(displayListIdx, 39);
+  public static void prepareLetters() {
+    foreach (l; 0..42) {
+        prepareLetter(l);
+    }
+
+    foreach (j; 0..2) {
+      foreach (i; 0..boxNumVertices) {
+        boxColors[j][i*4 + 0] *= A7xScreen.brightness;
+        boxColors[j][i*4 + 1] *= A7xScreen.brightness;
+        boxColors[j][i*4 + 2] *= A7xScreen.brightness;
+      }
+    }
   }
 
   private static float[5][16][] spData =

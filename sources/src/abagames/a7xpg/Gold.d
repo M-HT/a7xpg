@@ -22,7 +22,6 @@ import abagames.a7xpg.A7xScreen;
 public class Gold: LuminousActor {
  public:
   static const float SIZE = 1;
-  static int displayListIdx;
  private:
   Ship ship;
   Field field;
@@ -31,6 +30,36 @@ public class Gold: LuminousActor {
   Vector pos;
   int cnt;
   static const float ROLL_DEG = 1.0;
+  static const int goldNumVertices = 5;
+  static const int goldLineNumVertices = 5;
+  static const GLfloat[3*goldNumVertices] goldVertices = [
+     0,  0,  1,
+     1,  0,  0,
+     0,  1,  0,
+    -1,  0,  0,
+     0, -1,  0
+  ];
+  static GLfloat[4*goldNumVertices] goldColors = [
+    1  , 1  , 0.3, 0.9,
+    0.2, 0.5, 0.4, 0.8,
+    0.2, 0.5, 0.4, 0.8,
+    0.2, 0.5, 0.4, 0.8,
+    0.2, 0.5, 0.4, 0.8
+  ];
+  static const GLfloat[3*goldLineNumVertices] goldLineVertices = [
+     1,  0,  0,
+     0,  1,  0,
+    -1,  0,  0,
+     0, -1,  0,
+     1,  0,  0
+  ];
+  static GLfloat[4*goldLineNumVertices] goldLineColors = [
+    1, 1, 0.3, 0.9,
+    1, 1, 0.3, 0.9,
+    1, 1, 0.3, 0.9,
+    1, 1, 0.3, 0.9,
+    1, 1, 0.3, 0.9
+  ];
 
   public override Actor newActor() {
     return new Gold;
@@ -76,11 +105,11 @@ public class Gold: LuminousActor {
     glPushMatrix();
     glTranslatef(pos.x, pos.y, 0.5);
     glRotatef(ROLL_DEG * cnt, 0, 0, 1);
-    glCallList(displayListIdx);
-    glCallList(displayListIdx + 1);
+    drawGold();
+    drawGoldLine();
     glTranslatef(0, 0, -0.5);
     glScalef(1, 1, -1);
-    glCallList(displayListIdx);
+    drawGold();
     glPopMatrix();
   }
 
@@ -88,47 +117,46 @@ public class Gold: LuminousActor {
     glPushMatrix();
     glTranslatef(pos.x, pos.y, 0.5);
     glRotatef(ROLL_DEG * cnt, 0, 0, 1);
-    glCallList(displayListIdx + 1);
+    drawGoldLine();
     glPopMatrix();
   }
 
-  // Create display lists.
+  public static void prepareColors() {
+    foreach (i; 0..goldNumVertices) {
+      goldColors[i*4 + 0] *= A7xScreen.brightness;
+      goldColors[i*4 + 1] *= A7xScreen.brightness;
+      goldColors[i*4 + 2] *= A7xScreen.brightness;
+    }
 
-  public static void createDisplayLists() {
-    displayListIdx = glGenLists(2);
-    glNewList(displayListIdx, GL_COMPILE);
-    drawGold(1);
-    glEndList();
-    glNewList(displayListIdx + 1, GL_COMPILE);
-    drawGoldLine(1);
-    glEndList();
+    foreach (i; 0..goldLineNumVertices) {
+      goldLineColors[i*4 + 0] *= A7xScreen.brightness;
+      goldLineColors[i*4 + 1] *= A7xScreen.brightness;
+      goldLineColors[i*4 + 2] *= A7xScreen.brightness;
+    }
   }
 
-  public static void deleteDisplayLists() {
-    glDeleteLists(displayListIdx, 2);
+  public static void drawGold() {
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glEnableClientState(GL_COLOR_ARRAY);
+
+    glVertexPointer(3, GL_FLOAT, 0, cast(void *)(goldVertices.ptr));
+    glColorPointer(4, GL_FLOAT, 0, cast(void *)(goldColors.ptr));
+    glDrawArrays(GL_TRIANGLE_FAN, 0, goldNumVertices);
+
+    glDisableClientState(GL_COLOR_ARRAY);
+    glDisableClientState(GL_VERTEX_ARRAY);
   }
 
-  private static void drawGold(float alpha) {
-    glBegin(GL_TRIANGLE_FAN);
-    A7xScreen.setColor(1, 1, 0.3, 0.9 * alpha);
-    glVertex3f(0, 0, 1);
-    A7xScreen.setColor(0.2, 0.5, 0.4, 0.8 * alpha);
-    glVertex3f(1, 0, 0);
-    glVertex3f(0, 1, 0);
-    glVertex3f(-1, 0, 0);
-    glVertex3f(0, -1, 0);
-    glEnd();
-  }
+  public static void drawGoldLine() {
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glEnableClientState(GL_COLOR_ARRAY);
 
-  private static void drawGoldLine(float alpha) {
-    glBegin(GL_LINE_STRIP);
-    A7xScreen.setColor(1, 1, 0.3, 0.9 * alpha);
-    glVertex3f(1, 0, 0);
-    glVertex3f(0, 1, 0);
-    glVertex3f(-1, 0, 0);
-    glVertex3f(0, -1, 0);
-    glVertex3f(1, 0, 0);
-    glEnd();
+    glVertexPointer(3, GL_FLOAT, 0, cast(void *)(goldLineVertices.ptr));
+    glColorPointer(4, GL_FLOAT, 0, cast(void *)(goldLineColors.ptr));
+    glDrawArrays(GL_LINE_STRIP, 0, goldLineNumVertices);
+
+    glDisableClientState(GL_COLOR_ARRAY);
+    glDisableClientState(GL_VERTEX_ARRAY);
   }
 }
 
