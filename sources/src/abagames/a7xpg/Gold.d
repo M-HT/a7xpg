@@ -6,7 +6,11 @@
 module abagames.a7xpg.Gold;
 
 import std.math;
-import opengl;
+version (USE_GLES) {
+  import opengles;
+} else {
+  import opengl;
+}
 import abagames.util.Vector;
 import abagames.util.Rand;
 import abagames.util.Actor;

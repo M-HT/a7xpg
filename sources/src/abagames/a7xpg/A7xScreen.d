@@ -6,7 +6,13 @@
 module abagames.a7xpg.A7xScreen;
 
 import std.c.string;
-import opengl;
+version (USE_GLES) {
+  import opengles;
+  import opengles_fbo;
+  alias glOrthof glOrtho;
+} else {
+  import opengl;
+}
 import abagames.util.sdl.Screen3D;
 
 /**
@@ -34,6 +40,9 @@ public class A7xScreen: Screen3D {
 
   protected override void close() {
     glDeleteTextures(1, &luminousTexture);
+    version (USE_GLES) {
+      glDeleteFramebuffersOES(1, &luminousFramebuffer);
+    }
   }
 
   // Draw the luminous effect texture.
@@ -43,6 +52,9 @@ public class A7xScreen: Screen3D {
   const int LUMINOUS_TEXTURE_HEIGHT_MAX = 128;
   GLuint td[LUMINOUS_TEXTURE_WIDTH_MAX * LUMINOUS_TEXTURE_HEIGHT_MAX * 4 * uint.sizeof];
   int luminousTextureWidth = 128, luminousTextureHeight = 128;
+  version (USE_GLES) {
+    GLuint luminousFramebuffer;
+  }
 
   public void makeLuminousTexture() {
     uint *data = td.ptr;
@@ -52,18 +64,33 @@ public class A7xScreen: Screen3D {
     glBindTexture(GL_TEXTURE_2D, luminousTexture);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, luminousTextureWidth, luminousTextureHeight, 0,
 		 GL_RGBA, GL_UNSIGNED_BYTE, data);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    version (USE_GLES) {
+      glGenFramebuffersOES(1, &luminousFramebuffer);
+      glBindFramebufferOES(GL_FRAMEBUFFER_OES, luminousFramebuffer);
+      glFramebufferTexture2DOES(GL_FRAMEBUFFER_OES, GL_COLOR_ATTACHMENT0_OES, GL_TEXTURE_2D, luminousTexture, 0);
+      glClear(GL_COLOR_BUFFER_BIT);
+      glBindFramebufferOES(GL_FRAMEBUFFER_OES, 0);
+    }
   }
 
   public void startRenderToTexture() {
+    version (USE_GLES) {
+      glBindFramebufferOES(GL_FRAMEBUFFER_OES, luminousFramebuffer);
+      glClear(GL_COLOR_BUFFER_BIT);
+    }
     glViewport(0, 0, luminousTextureWidth, luminousTextureHeight);
   }
 
   public void endRenderToTexture() {
-    glBindTexture(GL_TEXTURE_2D, luminousTexture);
-    glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,
-		     0, 0, luminousTextureWidth, luminousTextureHeight, 0);
+    version (USE_GLES) {
+      glBindFramebufferOES(GL_FRAMEBUFFER_OES, 0);
+    } else {
+      glBindTexture(GL_TEXTURE_2D, luminousTexture);
+      glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,
+		       0, 0, luminousTextureWidth, luminousTextureHeight, 0);
+    }
     glViewport(0, 0, width, height);
   }
 

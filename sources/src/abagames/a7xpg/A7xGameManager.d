@@ -6,7 +6,11 @@
 module abagames.a7xpg.A7xGameManager;
 
 import std.math;
-import opengl;
+version (USE_GLES) {
+  import opengles;
+} else {
+  import opengl;
+}
 import SDL;
 import abagames.util.Rand;
 import abagames.util.GameManager;

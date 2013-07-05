@@ -5,7 +5,11 @@
  */
 module abagames.a7xpg.Field;
 
-import opengl;
+version (USE_GLES) {
+  import opengles;
+} else {
+  import opengl;
+}
 import abagames.util.Vector;
 import abagames.a7xpg.A7xScreen;
 

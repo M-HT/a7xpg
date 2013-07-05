@@ -6,7 +6,11 @@
 module abagames.util.sdl.Texture;
 
 import std.string;
-import opengl;
+version (USE_GLES) {
+  import opengles;
+} else {
+  import opengl;
+}
 import SDL;
 import abagames.util.sdl.SDLInitFailedException;
 
@@ -31,12 +35,12 @@ public class Texture {
     glBindTexture(GL_TEXTURE_2D, num);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, surface.w, surface.h, 0,
 		 GL_RGB, GL_UNSIGNED_BYTE, surface.pixels);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+    glTexParameterf(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
+    glTexParameterf(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
     /*gluBuild2DMipmaps(GL_TEXTURE_2D, 3, surface.w, surface.h,
       GL_RGB, GL_UNSIGNED_BYTE, surface.pixels);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);*/
+    glTexParameterf(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_NEAREST);
+    glTexParameterf(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);*/
   }
 
   public void deleteTexture() {
