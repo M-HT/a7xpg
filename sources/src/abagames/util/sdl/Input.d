@@ -34,6 +34,11 @@ public class Input {
 	"Unable to init SDL joystick: " ~ to!string(SDL_GetError()));
     }
     version (PANDORA) {
+      foreach (i; 0..SDL_NumJoysticks()) {
+        if (to!string(SDL_JoystickName(i)) == "nub0") {
+          stick = SDL_JoystickOpen(i);
+        }
+      }
     } else {
       stick = SDL_JoystickOpen(0);
     }
@@ -79,7 +84,7 @@ public class Input {
     }
     version (PANDORA) {
       if (keys[SDLK_HOME] == SDL_PRESSED || keys[SDLK_PAGEUP] == SDL_PRESSED) btnz = true;
-      if (keys[SDLK_END] == SDL_PRESSED || keys[SDLK_END] == SDL_PRESSED) btnx = true;
+      if (keys[SDLK_PAGEDOWN] == SDL_PRESSED || keys[SDLK_END] == SDL_PRESSED) btnx = true;
     } else {
       if (keys[SDLK_z] == SDL_PRESSED || keys[SDLK_LCTRL] == SDL_PRESSED || btn1 || btn4) btnz = true;
       if (keys[SDLK_x] == SDL_PRESSED || keys[SDLK_LALT] == SDL_PRESSED || btn2 || btn3) btnx = true;
