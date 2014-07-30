@@ -876,8 +876,8 @@ public class Enemy: LuminousActor {
       -0.5,  0   , 0.5,
        0  ,  size, 0.5,
        0.5,  0   , 0.5,
-       0  , -size, 0.5
-      -0.5,  0   , 0.5,
+       0  , -size, 0.5,
+      -0.5,  0   , 0.5
     ];
 
     A7xScreen.setColor(0.5, 0.9, 0.3, 0.9);
