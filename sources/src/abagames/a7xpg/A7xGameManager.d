@@ -8,6 +8,10 @@ module abagames.a7xpg.A7xGameManager;
 import std.math;
 import opengl;
 import SDL;
+version (PANDORA) {
+    import std.conv;
+    import std.process;
+}
 import abagames.util.Rand;
 import abagames.util.GameManager;
 import abagames.util.ActorPool;
@@ -357,6 +361,10 @@ public class A7xGameManager: GameManager {
       continueEnable = false;
     }
     Sound.fadeMusic();
+
+    version (PANDORA) {
+        system(escapeShellCommand("fusilli", "--cache", "push", "a7xpg", to!string(score), "0") ~ " >/dev/null 2>&1");
+    }
   }
 
   private void startPause() {

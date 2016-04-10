@@ -26,6 +26,7 @@ public class Rand {
   }
 
   public float nextFloat(float n) {
+    if (n == 0) return 0;
     return (cast(float)uniform(0, n * 10000, rnd)) / 10000;
   }
 }

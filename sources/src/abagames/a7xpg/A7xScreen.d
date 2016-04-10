@@ -64,7 +64,7 @@ public class A7xScreen: Screen3D {
     glBindTexture(GL_TEXTURE_2D, luminousTexture);
     glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,
 		     0, 0, luminousTextureWidth, luminousTextureHeight, 0);
-    glViewport(0, 0, width, height);
+    glViewport(startx, starty, width, height);
   }
 
   public void viewOrtho() {
