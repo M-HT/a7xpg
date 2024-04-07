@@ -7,7 +7,7 @@ module abagames.a7xpg.A7xGameManager;
 
 import std.math;
 import opengl;
-import SDL;
+import bindbc.sdl;
 version (PANDORA) {
     import std.conv;
     import std.process;
@@ -417,7 +417,7 @@ public class A7xGameManager: GameManager {
     enemies.move();
     particles.move();
     bonuses.move();
-    if (input.keys[SDLK_p] == SDL_PRESSED) {
+    if (input.keys[SDL_SCANCODE_P] == SDL_PRESSED) {
       if (!pPrsd) {
 	pPrsd = true;
 	startPause();
@@ -518,7 +518,7 @@ public class A7xGameManager: GameManager {
 
   private void pauseMove() {
     pauseCnt++;
-    if (input.keys[SDLK_p] == SDL_PRESSED) {
+    if (input.keys[SDL_SCANCODE_P] == SDL_PRESSED) {
       if (!pPrsd) {
 	pPrsd = true;
 	resumePause();
@@ -721,12 +721,6 @@ public class A7xGameManager: GameManager {
   }
 
   public override void draw() {
-    SDL_Event e = mainLoop.event;
-    if (e.type == SDL_VIDEORESIZE) {
-      SDL_ResizeEvent re = e.resize;
-      screen.resized(re.w, re.h);
-    }
-
     screen.startRenderToTexture();
     glPushMatrix();
     setEyepos();

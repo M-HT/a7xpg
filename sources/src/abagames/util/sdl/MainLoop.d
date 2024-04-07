@@ -7,7 +7,7 @@ module abagames.util.sdl.MainLoop;
 
 import std.string;
 import core.stdc.stdlib;
-import SDL;
+import bindbc.sdl;
 import abagames.util.Logger;
 import abagames.util.Rand;
 import abagames.util.GameManager;
@@ -26,7 +26,6 @@ public class MainLoop {
   int interval = INTERVAL_BASE;
   int accframe = 0;
   int maxSkipFrame = 5;
-  SDL_Event event;
 
  private:
   Screen screen;
@@ -71,6 +70,7 @@ public class MainLoop {
     int i;
     long nowTick;
     int frame;
+    SDL_Event event;
 
     try {
       screen.initSDL();
@@ -82,16 +82,32 @@ public class MainLoop {
     gameManager.start();
 
     while (!done) {
-      SDL_PollEvent(&event);
-      input.handleEvent(&event);
-      if (input.keys[SDLK_ESCAPE] == SDL_PRESSED || event.type == SDL_QUIT)
-	done = 1;
+      while (!done && SDL_PollEvent(&event)) {
+        switch (event.type) {
+          case SDL_KEYDOWN:
+            if (event.key.keysym.sym == SDLK_ESCAPE) {
+              done = 1;
+            }
+            break;
+          case SDL_QUIT:
+            done = 1;
+            break;
+          case SDL_WINDOWEVENT:
+            if (event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED) {
+              screen.resized(event.window.data1, event.window.data2);
+            }
+            break;
+          default:
+            break;
+        }
+      }
+      input.handleEvents();
 
       nowTick = SDL_GetTicks();
       frame = cast(int) (nowTick-prvTickCount) / interval;
       if (frame <= 0) {
 	frame = 1;
-	SDL_Delay(cast(Uint32)(prvTickCount+interval-nowTick));
+	SDL_Delay(cast(uint)(prvTickCount+interval-nowTick));
 	if (accframe) {
 	  prvTickCount = SDL_GetTicks();
 	} else {

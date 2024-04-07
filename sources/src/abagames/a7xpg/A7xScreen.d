@@ -50,7 +50,7 @@ public class A7xScreen: Screen3D {
     memset(data, 0, luminousTextureWidth * luminousTextureHeight * 4 * uint.sizeof);
     glGenTextures(1, &luminousTexture);
     glBindTexture(GL_TEXTURE_2D, luminousTexture);
-    glTexImage2D(GL_TEXTURE_2D, 0, 4, luminousTextureWidth, luminousTextureHeight, 0,
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, luminousTextureWidth, luminousTextureHeight, 0,
 		 GL_RGBA, GL_UNSIGNED_BYTE, data);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -62,9 +62,9 @@ public class A7xScreen: Screen3D {
 
   public void endRenderToTexture() {
     glBindTexture(GL_TEXTURE_2D, luminousTexture);
-    glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,
+    glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGB,
 		     0, 0, luminousTextureWidth, luminousTextureHeight, 0);
-    glViewport(startx, starty, width, height);
+    glViewport(screenStartX, screenStartY, screenWidth, screenHeight);
   }
 
   public void viewOrtho() {
