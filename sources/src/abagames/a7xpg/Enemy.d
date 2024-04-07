@@ -6,6 +6,7 @@
 module abagames.a7xpg.Enemy;
 
 import std.math;
+import std.conv;
 import opengl;
 import abagames.util.Vector;
 import abagames.util.Rand;
@@ -437,7 +438,7 @@ public class Enemy: LuminousActor {
       if (ship.checkHit(cx - ax, cy - ay, cx + ax, cy + ay)) {
 	hitShip();
       }
-      hi += size * 2 / speed;
+      hi += to!int(size * 2 / speed);
       if (hi >= POSITION_HISTORY_LENGTH)
 	hi -= POSITION_HISTORY_LENGTH;
     }
@@ -602,7 +603,7 @@ public class Enemy: LuminousActor {
       glScalef(1, 1, -1);
       glCallList(displayListIdx + 5 * 3 + 2);
       glPopMatrix();
-      hi += size * 2 / speed;
+      hi += to!int(size * 2 / speed);
       if (hi >= POSITION_HISTORY_LENGTH)
 	hi -= POSITION_HISTORY_LENGTH;
     }

@@ -5,7 +5,7 @@
  */
 module abagames.a7xpg.A7xBoot;
 
-import std.c.stdlib;
+import core.stdc.stdlib;
 import std.conv;
 import std.string;
 import std.stdio;

@@ -6,7 +6,7 @@
 module abagames.util.sdl.Screen3D;
 
 import std.string;
-import std.c.stdlib;
+import core.stdc.stdlib;
 import std.conv;
 import SDL;
 import opengl;

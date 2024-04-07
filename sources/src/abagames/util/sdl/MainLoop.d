@@ -6,7 +6,7 @@
 module abagames.util.sdl.MainLoop;
 
 import std.string;
-import std.c.stdlib;
+import core.stdc.stdlib;
 import SDL;
 import abagames.util.Logger;
 import abagames.util.Rand;

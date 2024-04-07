@@ -24,7 +24,7 @@ public class A7xPrefManager: PrefManager {
   public override void load() {
     scope File fd;
     try {
-      int read_data[1];
+      int[1] read_data;
       fd.open(PREF_FILE);
       fd.rawRead(read_data);
       if (read_data[0] != VERSION_NUM)
@@ -42,7 +42,7 @@ public class A7xPrefManager: PrefManager {
     scope File fd;
     try {
       fd.open(PREF_FILE, "wb");
-      const int write_data[2] = [VERSION_NUM, hiScore];
+      const int[2] write_data = [VERSION_NUM, hiScore];
       fd.rawWrite(write_data);
     } finally {
       fd.close();

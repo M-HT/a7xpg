@@ -5,7 +5,7 @@
  */
 module abagames.a7xpg.A7xScreen;
 
-import std.c.string;
+import core.stdc.string;
 import opengl;
 import abagames.util.sdl.Screen3D;
 
@@ -41,7 +41,7 @@ public class A7xScreen: Screen3D {
   GLuint luminousTexture;
   const int LUMINOUS_TEXTURE_WIDTH_MAX = 128;
   const int LUMINOUS_TEXTURE_HEIGHT_MAX = 128;
-  GLuint td[LUMINOUS_TEXTURE_WIDTH_MAX * LUMINOUS_TEXTURE_HEIGHT_MAX * 4 * uint.sizeof];
+  GLuint[LUMINOUS_TEXTURE_WIDTH_MAX * LUMINOUS_TEXTURE_HEIGHT_MAX * 4 * uint.sizeof] td;
   int luminousTextureWidth = 128, luminousTextureHeight = 128;
 
   public void makeLuminousTexture() {
@@ -94,7 +94,7 @@ public class A7xScreen: Screen3D {
     glPopMatrix();
   }
 
-  private int lmOfs[5][2] = [[0, 0], [1, 0], [-1, 0], [0, 1], [0, -1]];
+  private int[2][5] lmOfs = [[0, 0], [1, 0], [-1, 0], [0, 1], [0, -1]];
   private const float lmOfsBs = 5;
 
   public void drawLuminous() {
