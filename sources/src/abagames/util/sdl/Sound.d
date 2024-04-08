@@ -56,8 +56,8 @@ public class Sound {
         throw new SDLInitFailedException
           ("Couldn't open audio: " ~ to!string(SDL_GetError()));
       }
-      Mix_QuerySpec(&audio_rate, &audio_format, &audio_channels);
     }
+    Mix_QuerySpec(&audio_rate, &audio_format, &audio_channels);
   }
 
   public static void close() {
